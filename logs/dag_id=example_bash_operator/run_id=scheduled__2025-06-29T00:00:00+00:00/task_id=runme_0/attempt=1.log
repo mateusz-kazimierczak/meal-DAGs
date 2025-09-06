@@ -1,0 +1,15 @@
+{"timestamp":"2025-06-29T01:42:16.452819","level":"info","event":"DAG bundles loaded: dags-folder, example_dags","logger":"airflow.dag_processing.bundles.manager.DagBundlesManager"}
+{"timestamp":"2025-06-29T01:42:16.454810","level":"info","event":"Filling up the DagBag from /home/mateusz/.venv/lib/python3.11/site-packages/airflow/example_dags/standard/example_bash_operator.py","logger":"airflow.models.dagbag.DagBag"}
+{"timestamp":"2025-06-29T01:42:16.516694","level":"info","event":"Tmp dir root location: /tmp","logger":"airflow.task.hooks.airflow.providers.standard.hooks.subprocess.SubprocessHook"}
+{"timestamp":"2025-06-29T01:42:16.518520","level":"info","event":"Running command: ['/usr/bin/bash', '-c', 'echo \"example_bash_operator__runme_0__20250629\" && sleep 1']","logger":"airflow.task.hooks.airflow.providers.standard.hooks.subprocess.SubprocessHook"}
+{"timestamp":"2025-06-29T01:42:16.563984","level":"info","event":"Output:","logger":"airflow.task.hooks.airflow.providers.standard.hooks.subprocess.SubprocessHook"}
+{"timestamp":"2025-06-29T01:42:16.567250","level":"info","event":"example_bash_operator__runme_0__20250629","logger":"airflow.task.hooks.airflow.providers.standard.hooks.subprocess.SubprocessHook"}
+{"timestamp":"2025-06-29T01:42:16.865928Z","level":"info","event":"Task instance is in running state","chan":"stdout","logger":"task"}
+{"timestamp":"2025-06-29T01:42:16.866417Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.QUEUED","chan":"stdout","logger":"task"}
+{"timestamp":"2025-06-29T01:42:16.866815Z","level":"info","event":"Current task name:runme_0","chan":"stdout","logger":"task"}
+{"timestamp":"2025-06-29T01:42:16.867528Z","level":"info","event":"Dag name:example_bash_operator","chan":"stdout","logger":"task"}
+{"timestamp":"2025-06-29T01:42:17.577189","level":"info","event":"Command exited with return code 0","logger":"airflow.task.hooks.airflow.providers.standard.hooks.subprocess.SubprocessHook"}
+{"timestamp":"2025-06-29T01:42:17.583365","level":"info","event":"Pushing xcom","ti":"RuntimeTaskInstance(id=UUID('0197b959-4f1e-73d7-8cf7-fdcc69595741'), task_id='runme_0', dag_id='example_bash_operator', run_id='scheduled__2025-06-29T00:00:00+00:00', try_number=1, map_index=-1, hostname='raspberrypi', context_carrier=None, task=<Task(BashOperator): runme_0>, bundle_instance=LocalDagBundle(name=example_dags), max_tries=0, start_date=datetime.datetime(2025, 6, 29, 1, 42, 9, 466450, tzinfo=TzInfo(UTC)), end_date=None, state=<TaskInstanceState.RUNNING: 'running'>, is_mapped=False, rendered_map_index=None)","logger":"task"}
+{"timestamp":"2025-06-29T01:42:17.963090Z","level":"info","event":"Task instance in success state","chan":"stdout","logger":"task"}
+{"timestamp":"2025-06-29T01:42:17.963566Z","level":"info","event":" Previous state of the Task instance: TaskInstanceState.RUNNING","chan":"stdout","logger":"task"}
+{"timestamp":"2025-06-29T01:42:17.963930Z","level":"info","event":"Task operator:<Task(BashOperator): runme_0>","chan":"stdout","logger":"task"}

@@ -1,0 +1,17 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Airflow files
+airflow.cfg
+airflow.db
+logs
+simple_auth_manager_passwords.json.generated
+uv.lock
