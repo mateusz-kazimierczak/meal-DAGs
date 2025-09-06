@@ -1,0 +1,11 @@
+name: Deploy to Raspberry Pi
+on: [push]
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: uv sync
+
+      - run: echo "Code and dependencies are now set up on your Pi!"
