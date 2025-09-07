@@ -17,12 +17,12 @@ def get_relevant_users_task():
     users=db.users
     
     # get current day of the week
-    current_day = (pendulum.now().day_of_week - 1) % 7  # pendulum returns 0=Tuesday, 6=Monday, so we need to
+    current_day = (pendulum.now("America/Toronto").day_of_week - 1) % 7  # pendulum returns 0=Tuesday, 6=Monday, so we need to
 
 
     # find if should run morning noon or evening
     notification_time = "morning"
-    current_hour = pendulum.now().hour
+    current_hour = pendulum.now("America/Toronto").hour
 
     if current_hour < 10:
         notification_time = "morning"
