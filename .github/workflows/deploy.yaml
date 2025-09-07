@@ -5,15 +5,16 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Pull latest code into existing repository
-        # Set the working directory to your specific folder
-        working-directory: ~/airflow
+        # Use the full, absolute path to your directory
+        working-directory: /home/mateusz/airflow 
         run: |
           echo "Updating repository in existing folder..."
           git pull
           echo "Update complete."
 
       - name: Update dependencies
-        working-directory: ~/airflow
+        # Use the same absolute path here
+        working-directory: /home/mateusz/airflow
         run: |
           uv sync
 
