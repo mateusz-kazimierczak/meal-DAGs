@@ -39,9 +39,14 @@ def get_relevant_users_task():
 
     user_query = {
         "$and": [
-            # make sure the user has the email field enabled
-            {"notifications.notificationTypes.email": True},
-            {"active": True}
+            {"active": True},
+            # make sure the user is active
+            {"$or": [
+                {"notifications.notificationTypes.email": True},
+                {"notifications.notificationTypes.mobile": True}
+            ]},
+            # check that he has selected the current notification window
+            {f"notifications.schedule.{notification_time}.{current_day}": True},
         ]
     }
 
