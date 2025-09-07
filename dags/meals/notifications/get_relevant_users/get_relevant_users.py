@@ -136,7 +136,7 @@ def get_relevant_users_task():
 
     for user in users.find(user_query):
 
-        print("relevant user: ", user["_id"], user["firstName"])
+        print("relevant user: ", user["_id"], user["firstName"], user['notifications'])
 
         # First check what meals the user is signed up for
         is_user_in_meals_relevant = is_user_in_week_meals(user, relevant_day_date)
