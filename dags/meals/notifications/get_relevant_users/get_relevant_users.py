@@ -56,12 +56,14 @@ def get_relevant_users_task():
     relevant_next_day_date = now.add(days=day_offset + 1)
 
     # have to fetch meals for the relevant days
-    relevant_meals = db.meals.find({
+    relevant_meals_cursor = db.meals.find({
         "$or": [
             {"date": relevant_day_date.format('D/M/YYYY')},
             {"date": relevant_next_day_date.format('D/M/YYYY')}
         ]
     })
+
+    relevant_meals = list(relevant_meals_cursor)
 
     relevant_day_meals = relevant_meals.filter(lambda meal: meal['date'] == relevant_day_date.format('D/M/YYYY'))
     relevant_next_day_meals = relevant_meals.filter(lambda meal: meal['date'] == relevant_next_day_date.format('D/M/YYYY'))
