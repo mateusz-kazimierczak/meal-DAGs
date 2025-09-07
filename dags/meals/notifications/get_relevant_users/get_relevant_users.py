@@ -103,6 +103,8 @@ def get_relevant_users_task():
 
     relevant_meals = list(relevant_meals_cursor)
 
+    print("Relevant meals:", relevant_meals)
+
     relevant_day_meals = [meal for meal in relevant_meals if meal['date'] == relevant_day_date.format('D/M/YYYY')]
     relevant_next_day_meals = [meal for meal in relevant_meals if meal['date'] == relevant_next_day_date.format('D/M/YYYY')]
 
