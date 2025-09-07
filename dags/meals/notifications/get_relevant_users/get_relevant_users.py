@@ -70,7 +70,7 @@ def get_relevant_users_task():
 
     print("Relevant meals:")
     for meal in relevant_meals:
-        print(f"Date: {meal['date']}, Meal: {meal['name']}")
+        print(meal)
 
     relevant_day_meals = [meal for meal in relevant_meals if meal['date'] == relevant_day_date.format('D/M/YYYY')]
     relevant_next_day_meals = [meal for meal in relevant_meals if meal['date'] == relevant_next_day_date.format('D/M/YYYY')]
