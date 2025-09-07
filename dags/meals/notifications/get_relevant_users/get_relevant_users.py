@@ -8,7 +8,6 @@ def ensure_user_in_dict(dict, user_id):
 def is_user_in_week_meals(user, relevant_day_date):
     is_user_in_meals = False
 
-    print(user)
 
     for meal in user['meals'][relevant_day_date.day_of_week][:3]:
         if meal:
@@ -20,22 +19,22 @@ def is_user_in_week_meals(user, relevant_day_date):
 def handle_user_day_notification(user, relevant_day_date, relevant_day_label, relevant_meal_type, is_user_in_meals_relevant, is_user_in_packed_relevant, notification_objects):
     if user['notifications']['schema']['any_meals'][relevant_day_date.day_of_week]:
         if not is_user_in_meals_relevant and not is_user_in_packed_relevant:
-            ensure_user_in_dict(notification_objects, user._id)
-            notification_objects[user._id].append({
+            ensure_user_in_dict(notification_objects, user["_id"])
+            notification_objects[user["_id"]].append({
                 "type": "any",
                 "on": relevant_day_label
             })
     else:
         if user['notifications']['schema'][relevant_meal_type][relevant_day_date.day_of_week]:
             if not (is_user_in_meals_relevant if relevant_meal_type == 'meals' else is_user_in_packed_relevant):
-                ensure_user_in_dict(notification_objects, user._id)
-                notification_objects[user._id].append({
+                ensure_user_in_dict(notification_objects, user["_id"])
+                notification_objects[user["_id"]].append({
                     "type": relevant_meal_type,
                     "on": relevant_day_label
                 })
 
 def is_user_in_day_meals(user, day_id_list):
-    return user._id in day_id_list
+    return user["_id"] in day_id_list
 
 def get_relevant_users_task():
     """
