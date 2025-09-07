@@ -115,8 +115,6 @@ def get_relevant_users_task():
 
     relevant_meals = list(relevant_meals_cursor)
 
-    print("Relevant meals:", relevant_meals)
-
     try:
         relevant_day_meals = [meal for meal in relevant_meals if meal['date'] == relevant_day_date.format('D/M/YYYY')][0]
     except IndexError:
@@ -137,6 +135,8 @@ def get_relevant_users_task():
         relevant_next_day_packed_meals = []
 
     for user in users.find(user_query):
+
+        print("relevant user: ", user["_id"], user["firstName"])
 
         # First check what meals the user is signed up for
         is_user_in_meals_relevant = is_user_in_week_meals(user, relevant_day_date)
