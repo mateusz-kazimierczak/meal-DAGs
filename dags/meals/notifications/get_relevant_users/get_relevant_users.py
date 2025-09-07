@@ -1,8 +1,6 @@
 from airflow.providers.mongo.hooks.mongo import MongoHook
 import pendulum
 
-from dags.meals.notifications.get_relevant_users.generate_notification_objects import extract_user_info
-
 
 
 def get_relevant_users_task():
@@ -47,6 +45,8 @@ def get_relevant_users_task():
             {f"notifications.schedule.{notification_time}.{current_day}": True},
         ]
     }
+
+
 
     return users.find(user_query)
     
