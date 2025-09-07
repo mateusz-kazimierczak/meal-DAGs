@@ -8,6 +8,8 @@ def ensure_user_in_dict(dict, user_id):
 def is_user_in_week_meals(user, relevant_day_date):
     is_user_in_meals = False
 
+    print(user)
+
     for meal in user.meals[relevant_day_date.day_of_week][:3]:
         if meal:
             is_user_in_meals = True
