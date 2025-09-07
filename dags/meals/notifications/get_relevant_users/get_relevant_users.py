@@ -1,7 +1,7 @@
 from airflow.providers.mongo.hooks.mongo import MongoHook
 import pendulum
 
-from meals.notifications.get_relevant_users.extract_user_info import extract_user_info
+from dags.meals.notifications.get_relevant_users.generate_notification_objects import extract_user_info
 
 
 
@@ -35,8 +35,6 @@ def get_relevant_users_task():
 
     # find users that should be notified
 
-    relevant_users = []
-
     user_query = {
         "$and": [
             {"active": True},
@@ -50,6 +48,5 @@ def get_relevant_users_task():
         ]
     }
 
-    for user in users.find(user_query):
-        extract_user_info(user)
+    return users.find(user_query)
     
