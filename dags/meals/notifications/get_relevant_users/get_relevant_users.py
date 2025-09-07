@@ -1,7 +1,39 @@
 from airflow.providers.mongo.hooks.mongo import MongoHook
 import pendulum
 
+def ensure_user_in_dict(dict, user_id):
+    if user_id not in dict:
+        dict[user_id] = []
 
+def is_user_in_week_meals(user, relevant_day_date):
+    is_user_in_meals = False
+
+    for meal in user.meals[relevant_day_date.day_of_week][:3]:
+        if meal:
+            is_user_in_meals = True
+            break
+
+    return is_user_in_meals
+
+def handle_user_day_notification(user, relevant_day_date, relevant_day_label, relevant_meal_type, is_user_in_meals_relevant, is_user_in_packed_relevant, notification_objects):
+    if user['notifications']['schema']['any_meals'][relevant_day_date.day_of_week]:
+        if not is_user_in_meals_relevant and not is_user_in_packed_relevant:
+            ensure_user_in_dict(notification_objects, user._id)
+            notification_objects[user._id].append({
+                "type": "any",
+                "on": relevant_day_label
+            })
+    else:
+        if user['notifications']['schema'][relevant_meal_type][relevant_day_date.day_of_week]:
+            if not (is_user_in_meals_relevant if relevant_meal_type == 'meals' else is_user_in_packed_relevant):
+                ensure_user_in_dict(notification_objects, user._id)
+                notification_objects[user._id].append({
+                    "type": relevant_meal_type,
+                    "on": relevant_day_label
+                })
+
+def is_user_in_day_meals(user, day_id_list):
+    return user._id in day_id_list
 
 def get_relevant_users_task():
     """
@@ -56,7 +88,10 @@ def get_relevant_users_task():
     relevant_day_date = now.add(days=day_offset)
     relevant_next_day_date = now.add(days=day_offset + 1)
 
-    print("getting days :", relevant_day_date.format('D/M/YYYY'), relevant_next_day_date.format('D/M/YYYY'))
+    relevant_day_label = "today" if day_offset == 0 else "tomorrow"
+    relevant_day_label_next = "tomorrow" if day_offset == 0 else relevant_next_day_date.format('dddd')
+
+    print("getting relevant days :", relevant_day_date.format('D/M/YYYY'), relevant_next_day_date.format('D/M/YYYY'))
 
     # have to fetch meals for the relevant days
     relevant_meals_cursor = meals.find({
@@ -68,25 +103,26 @@ def get_relevant_users_task():
 
     relevant_meals = list(relevant_meals_cursor)
 
-    print("Relevant meals:")
-    for meal in relevant_meals:
-        print(meal)
-
     relevant_day_meals = [meal for meal in relevant_meals if meal['date'] == relevant_day_date.format('D/M/YYYY')]
     relevant_next_day_meals = [meal for meal in relevant_meals if meal['date'] == relevant_next_day_date.format('D/M/YYYY')]
 
-    print(relevant_next_day_meals)
+    relevant_day_packed_meals = [packed._id for packed in relevant_day_meals.packedMeals]
+    relevant_next_day_packed_meals = [packed._id for packed in relevant_next_day_meals.packedMeals]
 
     for user in users.find(user_query):
-        # first handle notifications on the relvant day
-        if user['notifications']['schema']['any_meals'][relevant_day_date.day_of_week]:
-            signed_up = False
 
-            # first check if the user is signed up for normal meals
-            for meal in user.meals[relevant_day_date.day_of_week][:3]:
-                if meal:
-                    signed_up = True
-                    break
-            
-            # # if it is not signed up for normal meals, check packed meals
-            # if not signed_up:
+        # First check what meals the user is signed up for
+        is_user_in_meals_relevant = is_user_in_week_meals(user, relevant_day_date)
+        is_user_in_meals_relevant_next = is_user_in_week_meals(user, relevant_next_day_date)
+
+        is_user_in_packed_relevant = is_user_in_day_meals(user, relevant_day_packed_meals)
+        is_user_in_packed_relevant_next = is_user_in_day_meals(user, relevant_next_day_packed_meals)
+
+
+        # First handle alerts for the current day
+        handle_user_day_notification(user, relevant_day_date, relevant_day_label, "meals", is_user_in_meals_relevant, is_user_in_packed_relevant, notification_objects)
+
+        # handle the next day
+        handle_user_day_notification(user, relevant_next_day_date, relevant_day_label_next, "packed_meals", is_user_in_meals_relevant_next, is_user_in_packed_relevant_next, notification_objects)
+
+    print(notification_objects)
