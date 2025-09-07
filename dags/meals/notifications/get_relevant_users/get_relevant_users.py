@@ -106,8 +106,8 @@ def get_relevant_users_task():
     relevant_day_meals = [meal for meal in relevant_meals if meal['date'] == relevant_day_date.format('D/M/YYYY')]
     relevant_next_day_meals = [meal for meal in relevant_meals if meal['date'] == relevant_next_day_date.format('D/M/YYYY')]
 
-    relevant_day_packed_meals = [packed._id for packed in relevant_day_meals.packedMeals]
-    relevant_next_day_packed_meals = [packed._id for packed in relevant_next_day_meals.packedMeals]
+    relevant_day_packed_meals = [packed._id for packed in relevant_day_meals.packed_meals]
+    relevant_next_day_packed_meals = [packed._id for packed in relevant_next_day_meals.packed_meals]
 
     for user in users.find(user_query):
 
