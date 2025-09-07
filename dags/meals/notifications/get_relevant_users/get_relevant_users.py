@@ -13,6 +13,7 @@ def get_relevant_users_task():
     client = hook.get_conn()
     db = client.test
     users=db.users
+    meals = db.days
     
     # get current day of the week
     current_day = (pendulum.now("America/Toronto").day_of_week)
@@ -58,7 +59,7 @@ def get_relevant_users_task():
     print("getting days :", relevant_day_date.format('D/M/YYYY'), relevant_next_day_date.format('D/M/YYYY'))
 
     # have to fetch meals for the relevant days
-    relevant_meals_cursor = db.meals.find({
+    relevant_meals_cursor = meals.find({
         "$or": [
             {"date": relevant_day_date.format('D/M/YYYY')},
             {"date": relevant_next_day_date.format('D/M/YYYY')}
