@@ -31,7 +31,7 @@ def get_relevant_users_task():
     else:
         notification_time = "evening"
 
-    print(f"Current day: {current_day}, Notification time: {notification_time}. Hour: {current_hour}")
+    print(f"Current day: {current_day}, Notification time: {notification_time}. Hour: {current_hour}. New code!")
 
     # find users that should be notified
 
