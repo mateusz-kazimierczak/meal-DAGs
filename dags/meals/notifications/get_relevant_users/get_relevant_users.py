@@ -46,7 +46,38 @@ def get_relevant_users_task():
         ]
     }
 
+    now = pendulum.now("America/Toronto")
 
+    notification_objects = []
 
-    return users.find(user_query)
-    
+    day_offset = 0 if notification_time == 'morning' else 1
+
+    relevant_day_date = now.add(days=day_offset)
+    relevant_next_day_date = now.add(days=day_offset + 1)
+
+    # have to fetch meals for the relevant days
+    relevant_meals = db.meals.find({
+        "$or": [
+            {"date": relevant_day_date.format('D/M/YYYY')},
+            {"date": relevant_next_day_date.format('D/M/YYYY')}
+        ]
+    })
+
+    relevant_day_meals = relevant_meals.filter(lambda meal: meal['date'] == relevant_day_date.format('D/M/YYYY'))
+    relevant_next_day_meals = relevant_meals.filter(lambda meal: meal['date'] == relevant_next_day_date.format('D/M/YYYY'))
+
+    print(relevant_next_day_meals)
+
+    for user in users.find(user_query):
+        # first handle notifications on the relvant day
+        if user['notifications']['schema']['any_meals'][relevant_day_date.day_of_week]:
+            signed_up = False
+
+            # first check if the user is signed up for normal meals
+            for meal in user.meals[relevant_day_date.day_of_week][:3]:
+                if meal:
+                    signed_up = True
+                    break
+            
+            # # if it is not signed up for normal meals, check packed meals
+            # if not signed_up:
