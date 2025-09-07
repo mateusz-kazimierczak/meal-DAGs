@@ -1,11 +1,17 @@
-name: Deploy to Raspberry Pi
-on: [push]
 jobs:
-  deploy:
+  deploy-to-pi:
     runs-on: self-hosted
+    
     steps:
-      - uses: actions/checkout@v4
+      - name: Pull latest code into existing repository
+        # Set the working directory to your specific folder
+        working-directory: ~/airflow
+        run: |
+          echo "Updating repository in existing folder..."
+          git pull
+          echo "Update complete."
 
-      - run: uv sync
-
-      - run: echo "Code and dependencies are now set up on your Pi!"
+      - name: Update dependencies
+        working-directory: ~/airflow
+        run: |
+          uv sync
