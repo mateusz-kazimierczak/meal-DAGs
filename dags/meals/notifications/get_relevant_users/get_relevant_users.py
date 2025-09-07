@@ -15,6 +15,8 @@ def get_relevant_users_task():
     client = hook.get_conn()
     db = client.test
     users=db.users
+
+    print("day of week: ", pendulum.now("America/Toronto").day_of_week)
     
     # get current day of the week
     current_day = (pendulum.now("America/Toronto").day_of_week - 1) % 7  # pendulum returns 0=Tuesday, 6=Monday, so we need to
