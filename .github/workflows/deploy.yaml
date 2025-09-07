@@ -9,7 +9,7 @@ jobs:
         working-directory: /home/mateusz/airflow 
         run: |
           echo "Updating repository in existing folder..."
-          git pull
+          git pull origin main
           echo "Update complete."
 
       - name: Update dependencies
