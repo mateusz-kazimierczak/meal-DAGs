@@ -1,4 +1,5 @@
 jobs:
+  on: [push]
   deploy-to-pi:
     runs-on: self-hosted
     
