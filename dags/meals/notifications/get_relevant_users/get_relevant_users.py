@@ -16,6 +16,17 @@ def is_user_in_week_meals(user, relevant_day_date):
 
     return is_user_in_meals
 
+def is_user_in_week_packed_meals(user, relevant_day_date):
+    is_user_in_meals = False
+
+
+    for meal in user['meals'][relevant_day_date.day_of_week][3:6]:
+        if meal:
+            is_user_in_meals = True
+            break
+
+    return is_user_in_meals
+
 def handle_user_day_notification(user, relevant_day_date, relevant_day_label, relevant_meal_type, is_user_in_meals_relevant, is_user_in_packed_relevant, notification_objects):
     if user['notifications']['schema']['any_meals'][relevant_day_date.day_of_week]:
         if not is_user_in_meals_relevant and not is_user_in_packed_relevant:
@@ -132,7 +143,7 @@ def get_relevant_users_task():
         is_user_in_meals_relevant_next = is_user_in_week_meals(user, relevant_next_day_date)
 
         is_user_in_packed_relevant = is_user_in_day_meals(user, relevant_day_packed_meals)
-        is_user_in_packed_relevant_next = is_user_in_day_meals(user, relevant_next_day_packed_meals)
+        is_user_in_packed_relevant_next = is_user_in_week_packed_meals(user, relevant_next_day_date)
 
 
         # First handle alerts for the current day
