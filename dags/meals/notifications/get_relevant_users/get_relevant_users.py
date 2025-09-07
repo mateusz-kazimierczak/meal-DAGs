@@ -82,7 +82,7 @@ def get_relevant_users_task():
 
     now = pendulum.now("America/Toronto")
 
-    notification_objects = []
+    notification_objects = {}
 
     day_offset = 0 if notification_time == 'morning' else 1
 
