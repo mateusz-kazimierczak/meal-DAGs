@@ -3,10 +3,19 @@ const fs = require("fs");
 
 console.log("API Key:", process.env.RESEND_API_KEY);
 
+const EMAIL_SENDER = "Meals <meals@ernescliff.com>"
+
 const send_emails = async (users) => {
     console.log("Sending emails...");
     try {
-      console.log(users)
+      resend.batch.send(
+        Object.entries(users).map(([userId, user]) => user.send_email && ({
+          from: EMAIL_SENDER,
+          to: [user.email],
+          subject: user.warning ? "!! No meals for tomorrow !!" : "Meal update",
+          react: <DailyEmail name={user.name}  />,
+        }))
+      )
     } catch (err) {
       console.log("Error sending email:", err);
     }
