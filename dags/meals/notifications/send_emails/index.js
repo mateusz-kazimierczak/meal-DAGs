@@ -1,4 +1,5 @@
-import { Resend } from "resend";
+const Resend = require("resend");
+const fs = require("fs");
 
 console.log("Resend API Key:", process.env.RESEND_API_KEY);
 
