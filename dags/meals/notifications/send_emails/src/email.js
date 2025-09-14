@@ -17,7 +17,7 @@ import {
   Column
 } from "@react-email/components";
 
-const MEAL_LIST = ["Breakfast", "Lunch", "Supper", "P1", "P2", "PS"];
+const MEAL_LIST = ["Breakfast", "Lunch", "Supper", "P1", "P2", "PS", "No meals", "Unmarked"];
 
 const FULL_MEALS_TEST = [
     true,
