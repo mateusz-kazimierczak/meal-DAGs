@@ -1,9 +1,18 @@
 from airflow.providers.mongo.hooks.mongo import MongoHook
 import pendulum
 
-def ensure_user_in_dict(dict, user_id):
+def ensure_user_in_dict(dict, user):
+    user_id = user["_id"]
+    
     if user_id not in dict:
-        dict[user_id] = []
+        user_email = user["email"]
+        user_name = user["firstName"]
+
+        dict[user_id] = {
+            'email': user_email,
+            'name': user_name,
+            'notifications': []
+        }
 
 def is_user_in_week_meals(user, relevant_day_date):
     is_user_in_meals = False
@@ -30,16 +39,16 @@ def is_user_in_week_packed_meals(user, relevant_day_date):
 def handle_user_day_notification(user, relevant_day_date, relevant_day_label, relevant_meal_type, is_user_in_meals_relevant, is_user_in_packed_relevant, notification_objects):
     if user['notifications']['schema']['any_meals'][relevant_day_date.day_of_week]:
         if not is_user_in_meals_relevant and not is_user_in_packed_relevant:
-            ensure_user_in_dict(notification_objects, user["_id"])
-            notification_objects[user["_id"]].append({
+            ensure_user_in_dict(notification_objects, user)
+            notification_objects[user["_id"]]['notifications'].append({
                 "type": "any",
                 "on": relevant_day_label
             })
     else:
         if user['notifications']['schema'][relevant_meal_type][relevant_day_date.day_of_week]:
             if not (is_user_in_meals_relevant if relevant_meal_type == 'meals' else is_user_in_packed_relevant):
-                ensure_user_in_dict(notification_objects, user["_id"])
-                notification_objects[user["_id"]].append({
+                ensure_user_in_dict(notification_objects, user)
+                notification_objects[user["_id"]]['notifications'].append({
                     "type": relevant_meal_type,
                     "on": relevant_day_label
                 })
@@ -159,15 +168,13 @@ def get_relevant_users_task():
             or (user['notifications']['report']['report_on_notifications'][relevant_day_date.day_of_week] and len(notification_objects.get(user["_id"], [])) > 0)
         
         if add_report:
-            ensure_user_in_dict(notification_objects, user["_id"])
-            notification_objects[user["_id"]].append({
+            ensure_user_in_dict(notification_objects, user)
+            notification_objects[user["_id"]]['notifications'].append({
                 "type": "report",
                 "first_on": relevant_day_label,
                 "next_on": relevant_day_label_next,
                 "first_meals": user['meals'][relevant_day_date.day_of_week],
                 "next_meals": user['meals'][relevant_next_day_date.day_of_week]
             })
-
-    print(notification_objects)
 
     return notification_objects
