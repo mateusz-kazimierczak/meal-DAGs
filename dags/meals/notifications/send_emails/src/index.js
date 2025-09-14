@@ -1,7 +1,7 @@
-const { Resend } = require("resend");
-const fs = require("fs");
-const React = require("react");
-const {DailyEmail} = require("./email");
+import { Resend } from "resend";
+import fs from "fs";
+import React from "react";
+import { DailyEmail } from "./email.js";
 
 const EMAIL_SENDER = "Meals <meals@ernescliff.com>"
 
