@@ -40,7 +40,7 @@ def is_user_in_week_packed_meals(user, relevant_day_date):
     return is_user_in_meals
 
 def handle_user_day_notification(user, relevant_day_date, relevant_day_label, relevant_meal_type, is_user_in_meals_relevant, is_user_in_packed_relevant, notification_objects):
-    if user['notifications']['schema']['any_meals'][relevant_day_date.day_of_week]:
+    if user['notifications']['schema']['any_meals'][relevant_day_date.day_of_week] and not user['meals'][relevant_day_date.day_of_week][6]:
         if not is_user_in_meals_relevant and not is_user_in_packed_relevant:
             ensure_user_in_dict(notification_objects, user)
             notification_objects[str(user["_id"])]['notifications'].append({
@@ -48,7 +48,7 @@ def handle_user_day_notification(user, relevant_day_date, relevant_day_label, re
                 "on": relevant_day_label
             })
     else:
-        if user['notifications']['schema'][relevant_meal_type][relevant_day_date.day_of_week]:
+        if user['notifications']['schema'][relevant_meal_type][relevant_day_date.day_of_week] and not user['meals'][relevant_day_date.day_of_week][6]:
             if not (is_user_in_meals_relevant if relevant_meal_type == 'meals' else is_user_in_packed_relevant):
                 ensure_user_in_dict(notification_objects, user)
                 notification_objects[str(user["_id"])]['notifications'].append({
