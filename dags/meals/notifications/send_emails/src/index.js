@@ -17,7 +17,7 @@ const send_emails = async (users) => {
           from: EMAIL_SENDER,
           to: [user.email],
           subject: user.warning ? "!! No meals for tomorrow !!" : "Meal update",
-          react: <DailyEmail name={user.name}  />,
+          react: <DailyEmail name={user.name} alerts={user.notifications} report={user.report} />,
         }))
       )
     } catch (err) {

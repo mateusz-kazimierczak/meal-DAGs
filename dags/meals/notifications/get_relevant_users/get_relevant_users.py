@@ -171,7 +171,6 @@ def get_relevant_users_task():
             if add_report:
                 ensure_user_in_dict(notification_objects, user)
                 notification_objects[str(user["_id"])]['report'] = {
-                    "type": "report",
                     "first_on": relevant_day_label,
                     "next_on": relevant_day_label_next,
                     "first_meals": user['meals'][relevant_day_date.day_of_week],

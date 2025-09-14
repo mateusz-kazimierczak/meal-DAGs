@@ -38,7 +38,7 @@ const EMPTY_MEALS_TEST = [
 ]
 
 
-export const DailyEmail = ({ name = "test_name", noMealsWarning = true, todayMeals = FULL_MEALS_TEST, tomorrowMeals = EMPTY_MEALS_TEST }) => (
+export const DailyEmail = ({ name = "test_name", alerts = [], report = null }) => (
   <Html>
     <Head />
     <Preview>
@@ -53,43 +53,46 @@ export const DailyEmail = ({ name = "test_name", noMealsWarning = true, todayMea
         />
 
         <Text style={title}>
-          Daily meal update
+          Meal update
         </Text>
 
         <Section style={section}>
         <Text style={text}>
             Hey <strong>{name}</strong>!
           </Text>
-            {noMealsWarning && (
-                <Text style={waringText}>
-                    ❗No meals marked for Tomorrow!!
-                </Text>
-            ) }
 
-            <Text>Your Meals for:</Text>
+            {
+              alerts.map((alert) => (
+                <AlertContainer alert={alert} />
+              ))
+            }
+
+          {
+            report != null && (
+              <>
+              <Text>Meal report:</Text>
 
             <Section>
                 <Row>
                     <Column style={halfCol}>
                         <Text style={headerText}>
-                            Today:
+                            {report.first_on}
                         </Text>
                     </Column>
                     <Column>
                         <Text style={headerText}>
-                            Tomorrow:
+                          {report.next_on}
                         </Text>
                     </Column>
                 </Row>
                 <Row>
-                  <Column style={halfCol} > <MealContainer meals={todayMeals} /></Column>
-                  <Column style={halfCol}  > <MealContainer meals={tomorrowMeals} /></Column>
+                  <Column style={halfCol} > <MealContainer meals={report.first_meals} /></Column>
+                  <Column style={halfCol}  > <MealContainer meals={report.next_meals} /></Column>
                 </Row>
             </Section>
-
-
-          
-          
+            </>
+            )
+          }
 
           <Button href={SITE_URL} style={button}>Go to app</Button>
         </Section>
@@ -111,6 +114,22 @@ const MealContainer = ({ meals }) => (
         ))}
     </Section>
 )
+
+const AlertContainer = ({ alert }) => {
+  const alert_id = `${alert.type}-${alert.on}`
+  const alert_color = waringText(alert.type);
+
+  const alert_texts = {
+    "any": `No meals marked for ${alert.on}`,
+    "meals": `No normal meals marked for ${alert.on}`,
+    "packed_meals": `No packed meals marked for ${alert.on}`,
+  }
+  return (
+    <Text key={alert.id} style={alert_color}>
+      ❗{alert_texts[alert.type] || "Alert"}
+    </Text>
+  );
+};
 
 const main = {
   backgroundColor: "#ffffff",
@@ -183,13 +202,30 @@ const button = {
   padding: "0.75em 1.5em",
 };
 
-const waringText = {
+const waringText = (alert_type) => {
+
+  let color = "orange";
+
+  switch (alert_type ) {
+    case 'any':
+      color = "#FCAF17"
+      break;
+    case 'meals':
+      color = "#F0454B"
+      break;
+    case 'packed_meals':
+      color = "#F15A22"
+      break;
+  }
+
+  return {
     margin: "0 0 10px 0",
     textAlign: "left",
     fontSize: "14px",
-    backgroundColor: "orange",
+    backgroundColor: color,
     padding: "10px",
     borderRadius: "5px",
+  };
 }
 
 const footer = {
