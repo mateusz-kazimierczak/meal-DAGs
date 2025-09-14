@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 import fs from "fs";
 import React from "react";
-import { DailyEmail } from "./email.js";
+import { DailyEmail, emailHeader } from "./email.js";
 
 const EMAIL_SENDER = "Meals <meals@ernescliff.com>"
 
@@ -16,7 +16,7 @@ const send_emails = async (users) => {
         Object.entries(users).map(([userId, user]) => user.send_email && ({
           from: EMAIL_SENDER,
           to: [user.email],
-          subject: user.warning ? "!! No meals for tomorrow !!" : "Meal update",
+          subject: emailHeader(user.notifications),
           react: <DailyEmail name={user.name} alerts={user.notifications} report={user.report} />,
         }))
       )

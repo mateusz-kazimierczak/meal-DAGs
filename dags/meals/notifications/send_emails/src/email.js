@@ -37,7 +37,7 @@ const EMPTY_MEALS_TEST = [
     false
 ]
 
-const emailHeader = (alerts) => {
+export const emailHeader = (alerts) => {
   if (alerts.length === 0) {
     return "EC meal report";
   } else {
