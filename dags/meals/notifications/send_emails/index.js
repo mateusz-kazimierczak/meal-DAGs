@@ -15,7 +15,7 @@ const send_emails = async (users) => {
 const read_user_from_json = async () => {
     console.log("Reading user data from JSON file...");
     try {
-        const data = await fs.promises.readFile('notifications.json', 'utf-8');
+        const data = await fs.promises.readFile(process.env.NOTIFICATIONS_PATH, 'utf-8');
         return JSON.parse(data);
     } catch (err) {
         console.log("Error reading user data:", err);

@@ -31,12 +31,14 @@ def meal_notifications():
         # save dict with notifications to json
         with open('notifications.json', 'w') as f:
             json.dump(users, f)
+            
 
     send_notifications_task = BashOperator(
         task_id="send_notifications",
-        bash_command="/home/mateusz/.nvm/versions/node/v22.19.0/bin/node /home/mateusz/airflow/dags/meals/notifications/send_emails/index.js",
+        bash_command=f"/home/mateusz/.nvm/versions/node/v22.19.0/bin/node /home/mateusz/airflow/dags/meals/notifications/send_emails/index.js",
         env={
-            "RESEND_API_KEY": RESEND_API_KEY
+            "RESEND_API_KEY": RESEND_API_KEY,
+            "NOTIFICATIONS_PATH": os.path.abspath('notifications.json')
         }
     )
 
