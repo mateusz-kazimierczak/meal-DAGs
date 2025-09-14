@@ -2,8 +2,8 @@ from airflow.providers.mongo.hooks.mongo import MongoHook
 import pendulum
 
 def ensure_user_in_dict(dict, user):
-    user_id = user["_id"]
-    
+    user_id = str(user["_id"])
+
     if user_id not in dict:
         user_email = user.get("email")
         user_name = user.get("firstName")
