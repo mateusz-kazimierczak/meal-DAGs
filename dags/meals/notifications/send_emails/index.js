@@ -3,6 +3,7 @@ import { Resend } from "resend";
 console.log("Resend API Key:", process.env.RESEND_API_KEY);
 
 const send_emails = async (users) => {
+    console.log("Sending emails...");
     try {
       console.log(users)
     } catch (err) {
@@ -11,6 +12,7 @@ const send_emails = async (users) => {
 };
 
 const read_user_from_json = async () => {
+    console.log("Reading user data from JSON file...");
     try {
         const data = await fs.promises.readFile('notifications.json', 'utf-8');
         return JSON.parse(data);
