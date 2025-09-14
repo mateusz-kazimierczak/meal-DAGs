@@ -42,7 +42,7 @@ def meal_notifications():
             }
         )
 
-    get_relevant_users()
+    get_relevant_users() >> send_notifications()
 
 
 dag = meal_notifications()
