@@ -1,10 +1,12 @@
-const resend = require("resend");
+const Resend = require("resend");
 const fs = require("fs");
 const react = require("react");
 
-console.log("API Key:", process.env.RESEND_API_KEY);
-
 const EMAIL_SENDER = "Meals <meals@ernescliff.com>"
+
+const resendApiKey = process.env.RESEND_API_KEY
+
+const resend = new Resend(resendApiKey);
 
 const send_emails = async (users) => {
     console.log("Sending emails...");
