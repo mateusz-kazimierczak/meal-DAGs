@@ -2,6 +2,7 @@ from airflow.providers.mongo.hooks.mongo import MongoHook
 import pendulum
 
 def ensure_user_in_dict(dict, user):
+    print(user)
     user_id = user["_id"]
     
     if user_id not in dict:
