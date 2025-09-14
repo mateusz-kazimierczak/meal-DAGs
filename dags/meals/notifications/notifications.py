@@ -32,17 +32,15 @@ def meal_notifications():
         with open('notifications.json', 'w') as f:
             json.dump(users, f)
 
-    @task()
-    def send_notifications():
-        BashOperator(
-            task_id="send_emails",
-            bash_command="node /home/mateusz/airflow/dags/meals/notifications/send_emails/index.js",
-            env = {
-                "RESEND_API_KEY": RESEND_API_KEY
-            }
-        )
+    send_notifications_task = BashOperator(
+        task_id="send_notifications",
+        bash_command="node /home/mateusz/airflow/dags/meals/notifications/send_emails/index.js",
+        env={
+            "RESEND_API_KEY": RESEND_API_KEY
+        }
+    )
 
-    get_relevant_users() >> send_notifications()
+    get_relevant_users() >> send_notifications_task
 
 
 dag = meal_notifications()
