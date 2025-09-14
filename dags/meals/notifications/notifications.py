@@ -8,8 +8,9 @@ from dotenv import load_dotenv
 from airflow.sdk import dag, task
 from airflow.operators.bash import BashOperator
 
-
 from meals.notifications.get_relevant_users.get_relevant_users import get_relevant_users_task
+from airflow.timetables.trigger import MultipleCronTriggerTimetable
+
 
 load_dotenv()
 
@@ -18,12 +19,18 @@ RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 dag_file_directory = Path(__file__).parent
 node_project_path = dag_file_directory / "send_emails"
 
+local_tz = pendulum.timezone("America/New_York")
 
 @dag(
-    schedule=None,
-    start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
+    schedule=MultipleCronTriggerTimetable(
+        "30 7 * * *",   # 7:30 AM
+        "0 12 * * *",   # 12:00 PM
+        "30 19 * * *",  # 7:30 PM
+        timezone=local_tz,
+    ),
+    start_date=pendulum.datetime(2025, 1, 1, tz="UTC"),
     catchup=False,
-    tags=["test"],
+    tags=["meals"],
 )
 def meal_notifications():
 
