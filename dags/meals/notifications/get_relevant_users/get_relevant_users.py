@@ -7,8 +7,10 @@ def ensure_user_in_dict(dict, user):
     if user_id not in dict:
         user_email = user.get("email")
         user_name = user.get("firstName")
+        user_send_email = user.get("notifications", {}).get("notificationTypes", {}).get("email", False)
 
         dict[user_id] = {
+            'send_email': user_send_email,
             'email': user_email,
             'name': user_name,
             'notifications': []
