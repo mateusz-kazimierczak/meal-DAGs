@@ -37,7 +37,7 @@ def meal_notifications():
             
     send_notifications_task = BashOperator(
         task_id="send_notifications",
-        bash_command=f"/home/mateusz/.nvm/versions/node/v22.19.0/bin/npm run start",
+        bash_command=f"/home/mateusz/.nvm/versions/node/v22.19.0/bin/node dist/index.js",
         env={
             "RESEND_API_KEY": RESEND_API_KEY,
             "NOTIFICATIONS_PATH": os.path.abspath('notifications.json')
