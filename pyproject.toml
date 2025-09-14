@@ -7,5 +7,6 @@ requires-python = ">=3.11"
 dependencies = [
     "apache-airflow>=3.0.6",
     "apache-airflow-providers-mongo>=5.2.2",
+    "dotenv>=0.9.9",
     "numpy>=2.3.2",
 ]

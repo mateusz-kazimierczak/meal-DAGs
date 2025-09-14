@@ -1,11 +1,18 @@
 
 import json
-
-
+import os
 import pendulum
+from dotenv import load_dotenv
 from airflow.sdk import dag, task
 
 from meals.notifications.get_relevant_users.get_relevant_users import get_relevant_users_task
+
+load_dotenv()
+
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+
+print("Resend API Key:", RESEND_API_KEY)
+
 @dag(
     schedule=None,
     start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
