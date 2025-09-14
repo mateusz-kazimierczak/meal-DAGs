@@ -37,12 +37,27 @@ const EMPTY_MEALS_TEST = [
     false
 ]
 
+const emailHeader = (alerts) => {
+  if (alerts.length === 0) {
+    return "EC meal report";
+  } else {
+    let distinct_on = []
+    alerts.forEach(alert => {
+      if (!distinct_on.includes(alert.on)) {
+        distinct_on.push(alert.on);
+      }
+    });
+    return `No meals for ${distinct_on.join(" and ")}`;
+  }
+  return "No new updates";
+}
+
 
 export const DailyEmail = ({ name = "test_name", alerts = [], report = null }) => (
   <Html>
     <Head />
     <Preview>
-      {noMealsWarning ? "Mark your meals!" : "Meals today"}
+      {emailHeader(alerts)}
     </Preview>
     <Body style={main}>
       <Container style={container}>
