@@ -1,6 +1,8 @@
 
 import json
 import os
+
+from pathlib import Path
 import pendulum
 from dotenv import load_dotenv
 from airflow.sdk import dag, task
@@ -13,7 +15,8 @@ load_dotenv()
 
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 
-print("Resend API Key:", RESEND_API_KEY)
+dag_file_directory = Path(__file__).parent
+node_project_path = dag_file_directory / "send_emails"
 
 
 @dag(
@@ -39,7 +42,7 @@ def meal_notifications():
             "RESEND_API_KEY": RESEND_API_KEY,
             "NOTIFICATIONS_PATH": os.path.abspath('notifications.json')
         },
-        cwd="/Users/mateusz/Documents/code/meals/meal-DAGs/dags/meals/notifications/send_emails",
+        cwd=node_project_path,
     )
 
     get_relevant_users() >> send_notifications_task
