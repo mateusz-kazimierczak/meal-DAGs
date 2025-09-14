@@ -159,20 +159,22 @@ def get_relevant_users_task():
         # handle the next day
         handle_user_day_notification(user, relevant_next_day_date, relevant_day_label_next, "packed_meals", is_user_in_meals_relevant_next, is_user_in_packed_relevant_next, notification_objects)
 
-        # Add full report, both for the relevant day and the next day
-
-        add_report = \
-            user['notifications']['report']['full_report'][relevant_day_date.day_of_week] \
-            or (user['notifications']['report']['report_on_notifications'][relevant_day_date.day_of_week] and len(notification_objects.get(str(user["_id"]), [])) > 0)
-        
-        if add_report:
-            ensure_user_in_dict(notification_objects, user)
-            notification_objects[str(user["_id"])]['notifications'].append({
-                "type": "report",
-                "first_on": relevant_day_label,
-                "next_on": relevant_day_label_next,
-                "first_meals": user['meals'][relevant_day_date.day_of_week],
-                "next_meals": user['meals'][relevant_next_day_date.day_of_week]
-            })
+        try:
+            # Add full report, both for the relevant day and the next day
+            add_report = \
+                user['notifications']['report']['full_report'][relevant_day_date.day_of_week] \
+                or (user['notifications']['report']['report_on_notifications'][relevant_day_date.day_of_week] and len(notification_objects.get(str(user["_id"]), [])) > 0)
+            
+            if add_report:
+                ensure_user_in_dict(notification_objects, user)
+                notification_objects[str(user["_id"])]['notifications'].append({
+                    "type": "report",
+                    "first_on": relevant_day_label,
+                    "next_on": relevant_day_label_next,
+                    "first_meals": user['meals'][relevant_day_date.day_of_week],
+                    "next_meals": user['meals'][relevant_next_day_date.day_of_week]
+                })
+        except KeyError:
+            pass
 
     return notification_objects
