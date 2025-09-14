@@ -34,7 +34,7 @@ def meal_notifications():
 
     send_notifications_task = BashOperator(
         task_id="send_notifications",
-        bash_command="node /home/mateusz/airflow/dags/meals/notifications/send_emails/index.js",
+        bash_command="/home/mateusz/.nvm/versions/node/v22.19.0/bin/node /home/mateusz/airflow/dags/meals/notifications/send_emails/index.js",
         env={
             "RESEND_API_KEY": RESEND_API_KEY
         }
