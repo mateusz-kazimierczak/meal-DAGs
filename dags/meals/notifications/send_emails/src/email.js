@@ -1,5 +1,6 @@
 const SITE_URL = process.env.SITE_URL || "https://ecmeals.netlify.app/";
 
+const React = require("react");
 
 import {
   Body,
