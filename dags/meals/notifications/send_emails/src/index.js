@@ -10,7 +10,7 @@ const resendApiKey = process.env.RESEND_API_KEY
 const resend = new Resend(resendApiKey);
 
 const send_emails = async (users) => {
-    console.log("Sending emails...");
+    console.log("Sending emails: ", users);
     try {
       resend.batch.send(
         Object.entries(users).map(([userId, user]) => user.send_email && ({
