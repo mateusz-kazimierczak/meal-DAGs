@@ -23,9 +23,14 @@ jobs:
         # Replace 'my-node-app' with the actual name of your directory
         working-directory: /home/mateusz/airflow/dags/meals/notifications/send_emails
         run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          
+          echo "Node version: $(node -v)"
+          echo "npm version: $(npm -v)"
+
           echo "Installing npm dependencies..."
           npm install
-          echo "npm dependencies are installed."
 
       - run: echo "Code and dependencies are now set up on your Pi!"
 
