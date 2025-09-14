@@ -4,6 +4,8 @@ import os
 import pendulum
 from dotenv import load_dotenv
 from airflow.sdk import dag, task
+from airflow.operators.bash import BashOperator
+
 
 from meals.notifications.get_relevant_users.get_relevant_users import get_relevant_users_task
 
@@ -29,6 +31,16 @@ def meal_notifications():
         # save dict with notifications to json
         with open('notifications.json', 'w') as f:
             json.dump(users, f)
+
+    @task()
+    def send_notifications():
+        BashOperator(
+            task_id="send_emails",
+            bash_command="node /home/mateusz/airflow/dags/meals/notifications/send_emails/index.js",
+            env = {
+                "RESEND_API_KEY": RESEND_API_KEY
+            }
+        )
 
     get_relevant_users()
 

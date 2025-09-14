@@ -17,6 +17,15 @@ jobs:
         working-directory: /home/mateusz/airflow
         run: |
           uv sync
+      
+      - name: Install Node.js dependencies
+        # New step: Navigate to the subdirectory and install npm packages
+        # Replace 'my-node-app' with the actual name of your directory
+        working-directory: /home/mateusz/airflow/dags/meals/notifications/send_emails
+        run: |
+          echo "Installing npm dependencies..."
+          npm install
+          echo "npm dependencies are installed."
 
       - run: echo "Code and dependencies are now set up on your Pi!"
 
