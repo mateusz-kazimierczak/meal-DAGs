@@ -13,6 +13,7 @@ RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 
 print("Resend API Key:", RESEND_API_KEY)
 
+
 @dag(
     schedule=None,
     start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
