@@ -1,4 +1,4 @@
-const Resend = require("resend");
+const { Resend } = require("resend");
 const fs = require("fs");
 const react = require("react");
 
