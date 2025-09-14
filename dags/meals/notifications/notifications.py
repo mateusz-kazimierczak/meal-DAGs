@@ -32,14 +32,14 @@ def meal_notifications():
         with open('notifications.json', 'w') as f:
             json.dump(users, f)
             
-
     send_notifications_task = BashOperator(
         task_id="send_notifications",
-        bash_command=f"/home/mateusz/.nvm/versions/node/v22.19.0/bin/node /home/mateusz/airflow/dags/meals/notifications/send_emails/index.js",
+        bash_command=f"/home/mateusz/.nvm/versions/node/v22.19.0/bin/npm run start",
         env={
             "RESEND_API_KEY": RESEND_API_KEY,
             "NOTIFICATIONS_PATH": os.path.abspath('notifications.json')
-        }
+        },
+        cwd="/Users/mateusz/Documents/code/meals/meal-DAGs/dags/meals/notifications/send_emails",
     )
 
     get_relevant_users() >> send_notifications_task

@@ -31,6 +31,15 @@ jobs:
 
           echo "Installing npm dependencies..."
           npm install
+      - name: Build Node.js Project (Transpile JSX)
+        # New step to transpile the JSX source code
+        working-directory: /home/mateusz/airflow/dags/meals/notifications/send_emails
+        run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+          echo "Transpiling JSX to plain JavaScript..."
+          npm run build
 
       - run: echo "Code and dependencies are now set up on your Pi!"
 
