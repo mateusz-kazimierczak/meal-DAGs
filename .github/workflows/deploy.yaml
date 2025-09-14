@@ -19,3 +19,4 @@ jobs:
           uv sync
 
       - run: echo "Code and dependencies are now set up on your Pi!"
+
