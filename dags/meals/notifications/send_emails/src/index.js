@@ -1,6 +1,7 @@
 const { Resend } = require("resend");
 const fs = require("fs");
 const React = require("react");
+const {DailyEmail} = require("./email");
 
 const EMAIL_SENDER = "Meals <meals@ernescliff.com>"
 

@@ -1,6 +1,5 @@
 const SITE_URL = process.env.SITE_URL || "https://ecmeals.netlify.app/";
 
-import { MEAL_LIST } from "../src/_helpers/CONST";
 
 import {
   Body,
