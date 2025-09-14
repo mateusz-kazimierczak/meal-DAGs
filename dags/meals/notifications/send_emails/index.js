@@ -1,5 +1,6 @@
 const Resend = require("resend");
 const fs = require("fs");
+const react = require("react");
 
 console.log("API Key:", process.env.RESEND_API_KEY);
 
