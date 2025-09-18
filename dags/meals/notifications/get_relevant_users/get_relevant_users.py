@@ -140,8 +140,10 @@ def get_relevant_users_task():
         relevant_next_day_meals = None
 
     try:
+        relevant_day_packed_meal_types = [packed for packed in relevant_day_meals.packed_meals]
         relevant_day_packed_meals = [packed._id for packed in relevant_day_meals.packed_meals]
     except AttributeError:
+        print("Could not get relevant_day_packed_meals")
         relevant_day_packed_meals = []
 
     try:
