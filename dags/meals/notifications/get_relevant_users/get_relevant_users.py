@@ -39,6 +39,9 @@ def is_user_in_week_packed_meals(user, relevant_day_date):
 
     return is_user_in_meals
 
+def get_user_packed_meals(day, user):
+    pass
+
 def handle_user_day_notification(user, relevant_day_date, relevant_day_label, relevant_meal_type, is_user_in_meals_relevant, is_user_in_packed_relevant, notification_objects):
     if user['notifications']['schema']['any_meals'][relevant_day_date.day_of_week] and not user['meals'][relevant_day_date.day_of_week][6]:
         if not is_user_in_meals_relevant and not is_user_in_packed_relevant:
@@ -143,7 +146,9 @@ def get_relevant_users_task():
 
     try:
         relevant_next_day_packed_meals = [packed._id for packed in relevant_next_day_meals.packed_meals]
+        print("Getting relevant_next_day_packed_meals:", relevant_next_day_packed_meals)
     except AttributeError:
+        print("Could not get relevant_next_day_packed_meals")
         relevant_next_day_packed_meals = []
 
     for user in users.find(user_query):
@@ -170,6 +175,8 @@ def get_relevant_users_task():
             
             if add_report:
                 ensure_user_in_dict(notification_objects, user)
+
+                # relevant_user_meals = user['meals'][relevant_day_date.day_of_week][:3] + 
                 notification_objects[str(user["_id"])]['report'] = {
                     "first_on": relevant_day_label,
                     "next_on": relevant_day_label_next,
