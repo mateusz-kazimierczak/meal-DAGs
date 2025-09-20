@@ -150,10 +150,10 @@ def get_relevant_users_task():
         relevant_day_packed_meals = []
 
     try:
-        relevant_day_packed_meals = []
+        relevant_next_day_packed_meals = []
         for packed_meal_type in relevant_next_day_meals['packedMeals']:
             for packed in packed_meal_type:
-                relevant_day_packed_meals.append(packed['_id'])
+                relevant_next_day_packed_meals.append(packed['_id'])
         print("Getting relevant_next_day_packed_meals:", relevant_next_day_packed_meals)
     except AttributeError as e:
         print("Could not get relevant_next_day_packed_meals:", e)
