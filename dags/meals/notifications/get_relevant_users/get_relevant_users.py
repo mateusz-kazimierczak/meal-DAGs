@@ -140,8 +140,8 @@ def get_relevant_users_task():
         relevant_next_day_meals = None
 
     try:
-        print(meals)
         relevant_day_packed_meal_types = [packed for packed in relevant_day_meals['packedMeals']]
+        print(relevant_day_packed_meal_types)
         relevant_day_packed_meals = [packed['_id'] for packed in relevant_day_packed_meal_types]
         print("Getting relevant_day_packed_meals:", relevant_day_packed_meals)
     except AttributeError as e:
