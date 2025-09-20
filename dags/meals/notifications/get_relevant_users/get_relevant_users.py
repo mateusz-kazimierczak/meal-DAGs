@@ -140,17 +140,20 @@ def get_relevant_users_task():
         relevant_next_day_meals = None
 
     try:
-        relevant_day_packed_meal_types = [packed for packed in relevant_day_meals['packedMeals']]
-        print(relevant_day_packed_meal_types)
-        relevant_day_packed_meals = [packed['_id'] for packed in relevant_day_packed_meal_types]
+        relevant_day_packed_meals = []
+        for packed_meal_type in relevant_day_meals['packedMeals']:
+            for packed in packed_meal_type:
+                relevant_day_packed_meals.append(packed['_id'])
         print("Getting relevant_day_packed_meals:", relevant_day_packed_meals)
     except AttributeError as e:
         print("Could not get relevant_day_packed_meals:", e)
         relevant_day_packed_meals = []
 
     try:
-        relevant_next_day_packed_meal_types = [packed['_id'] for packed in relevant_next_day_meals['packedMeals']]
-        relevant_day_packed_meals = [packed._id for packed in relevant_next_day_packed_meal_types]
+        relevant_day_packed_meals = []
+        for packed_meal_type in relevant_next_day_meals['packedMeals']:
+            for packed in packed_meal_type:
+                relevant_day_packed_meals.append(packed['_id'])
         print("Getting relevant_next_day_packed_meals:", relevant_next_day_packed_meals)
     except AttributeError as e:
         print("Could not get relevant_next_day_packed_meals:", e)
