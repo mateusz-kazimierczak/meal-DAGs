@@ -180,7 +180,7 @@ def get_relevant_users_task():
             if add_report:
                 ensure_user_in_dict(notification_objects, user)
 
-                relevant_user_meals = user['meals'][relevant_day_date.day_of_week][:3] + get_user_packed_meals(relevant_day_meals, user) + user['meals'][relevant_day_date.day_of_week][6]
+                relevant_user_meals = user['meals'][relevant_day_date.day_of_week][:3] + [get_user_packed_meals(relevant_day_meals, user)] + [user['meals'][relevant_day_date.day_of_week][6]]
                 notification_objects[str(user["_id"])]['report'] = {
                     "first_on": relevant_day_label,
                     "next_on": relevant_day_label_next,
