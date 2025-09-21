@@ -1,4 +1,5 @@
 import { Expo } from 'expo-server-sdk';
+import fs from "fs";
 
 // Create a new Expo SDK client
 // optionally providing an access token if you have enabled push security
@@ -73,7 +74,9 @@ let tickets = [];
 })();
 
 // Wait 30 seconds
-await new Promise(resolve => setTimeout(resolve, 30000));
+if (messages.length > 0) {
+  await new Promise(resolve => setTimeout(resolve, 30000));
+
 
 // Later, after the Expo push notification service has delivered the
 // notifications to Apple or Google (usually quickly, but allow the service
@@ -131,3 +134,5 @@ let receiptIdChunks = expo.chunkPushNotificationReceiptIds(receiptIds);
     }
   }
 })();
+
+}
