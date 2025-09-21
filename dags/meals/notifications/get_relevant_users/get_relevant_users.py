@@ -8,13 +8,15 @@ def ensure_user_in_dict(dict, user):
         user_email = user.get("email")
         user_name = user.get("firstName")
         user_send_email = user.get("notifications", {}).get("notificationTypes", {}).get("email", False)
+        user_send_push = user.get("notifications", {}).get("notificationTypes", {}).get("push", False)
 
         dict[user_id] = {
             'send_email': user_send_email,
             'email': user_email,
             'name': user_name,
             'notifications': [],
-            'report': None
+            'report': None,
+            'device': None if user_send_push else user.get("device")
         }
 
 def is_user_in_week_meals(user, relevant_day_date):
@@ -53,15 +55,18 @@ def handle_user_day_notification(user, relevant_day_date, relevant_day_label, re
             ensure_user_in_dict(notification_objects, user)
             notification_objects[str(user["_id"])]['notifications'].append({
                 "type": "any",
-                "on": relevant_day_label
+                "on": relevant_day_label,
+                "text": f"No meals marked for {relevant_day_label}"
             })
     else:
+        
         if user['notifications']['schema'][relevant_meal_type][relevant_day_date.day_of_week] and not user['meals'][relevant_day_date.day_of_week][6]:
             if not (is_user_in_meals_relevant if relevant_meal_type == 'meals' else is_user_in_packed_relevant):
                 ensure_user_in_dict(notification_objects, user)
                 notification_objects[str(user["_id"])]['notifications'].append({
                     "type": relevant_meal_type,
-                    "on": relevant_day_label
+                    "on": relevant_day_label,
+                    "text": f"No {relevant_meal_type.replace('_', ' ')} marked for {relevant_day_label}"
                 })
 
 def is_user_in_day_meals(user, day_id_list):

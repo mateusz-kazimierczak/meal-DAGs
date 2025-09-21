@@ -134,14 +134,9 @@ const AlertContainer = ({ alert }) => {
   const alert_id = `${alert.type}-${alert.on}`
   const alert_color = waringText(alert.type);
 
-  const alert_texts = {
-    "any": `No meals marked for ${alert.on}`,
-    "meals": `No normal meals marked for ${alert.on}`,
-    "packed_meals": `No packed meals marked for ${alert.on}`,
-  }
   return (
     <Text key={alert.id} style={alert_color}>
-      ❗{alert_texts[alert.type] || "Alert"}
+      ❗{alert.text || "Alert"}
     </Text>
   );
 };
