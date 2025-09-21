@@ -10,6 +10,8 @@ def ensure_user_in_dict(dict, user):
         user_send_email = user.get("notifications", {}).get("notificationTypes", {}).get("email", False)
         user_send_push = user.get("notifications", {}).get("notificationTypes", {}).get("push", False)
 
+        print(f"Adding user {user_id} to notifications dict. Email: {user_email}, Name: {user_name}, Send email: {user_send_email}, Send push: {user_send_push}")
+
         dict[user_id] = {
             'send_email': user_send_email,
             'email': user_email,
