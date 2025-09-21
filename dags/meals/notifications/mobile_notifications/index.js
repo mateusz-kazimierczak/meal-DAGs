@@ -41,13 +41,12 @@ Object.entries(notificationData).map(([userId, notification]) => {
         return;
     }
 
-    // Construct a message (see https://docs.expo.io/push-notifications/sending-notifications/)
-    messages.push({
-        to: pushToken,
-        sound: 'bell.wav',
-        title: "Hello",
-        body: "Hello"
-    })
+    notification.notifications.forEach(alert => {
+        messages.push({
+            to: pushToken,
+            sound: 'bell.wav',
+            title: alert.text,
+        });
 });
 
 // The Expo push notification service accepts batches of notifications so
