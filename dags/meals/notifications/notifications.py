@@ -63,7 +63,8 @@ def meal_notifications():
         cwd=email_node_project_path,
     )
 
-    get_relevant_users() >> [send_email_notifications_task, send_mobile_notifications_task]
+    get_relevant_users()
+    # get_relevant_users() >> [send_email_notifications_task, send_mobile_notifications_task]
 
 
 dag = meal_notifications()
