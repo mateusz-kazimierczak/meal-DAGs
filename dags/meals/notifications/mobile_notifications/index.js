@@ -20,6 +20,8 @@ const read_user_from_json = async () => {
 
 const notificationData = await read_user_from_json();
 
+console.log("Notification data:", notificationData);
+
 // Create the messages that you want to send to clients
 let messages = [];
 for (let notification of notificationData) {
