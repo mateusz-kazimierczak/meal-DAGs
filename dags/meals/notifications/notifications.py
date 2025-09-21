@@ -1,4 +1,3 @@
-
 import json
 import os
 
@@ -17,7 +16,8 @@ load_dotenv()
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 
 dag_file_directory = Path(__file__).parent
-node_project_path = dag_file_directory / "send_emails"
+email_node_project_path = dag_file_directory / "send_emails"
+mobile_node_project_path = dag_file_directory / "mobile_notifications"
 
 local_tz = pendulum.timezone("America/New_York")
 
@@ -44,18 +44,23 @@ def meal_notifications():
         # save dict with notifications to json
         with open('notifications.json', 'w') as f:
             json.dump(users, f)
-            
-    send_notifications_task = BashOperator(
+
+    send_mobile_notifications_task = BashOperator(
+        task_id="send_mobile_notifications",
+        bash_command=f"/home/mateusz/.nvm/versions/node/v22.19.0/bin/node index.js",
+        cwd=mobile_node_project_path,
+    )
+    send_email_notifications_task = BashOperator(
         task_id="send_notifications",
         bash_command=f"/home/mateusz/.nvm/versions/node/v22.19.0/bin/node dist/index.js",
         env={
             "RESEND_API_KEY": RESEND_API_KEY,
             "NOTIFICATIONS_PATH": os.path.abspath('notifications.json')
         },
-        cwd=node_project_path,
+        cwd=email_node_project_path,
     )
 
-    get_relevant_users() >> send_notifications_task
+    get_relevant_users() >> [send_email_notifications_task, send_mobile_notifications_task]
 
 
 dag = meal_notifications()

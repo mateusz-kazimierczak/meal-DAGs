@@ -36,7 +36,9 @@ dependencies = [
     { name = "apache-airflow" },
     { name = "apache-airflow-providers-mongo" },
     { name = "dotenv" },
+    { name = "exponent-server-sdk" },
     { name = "numpy" },
+    { name = "rollbar" },
 ]
 
 [package.metadata]
@@ -44,7 +46,9 @@ requires-dist = [
     { name = "apache-airflow", specifier = ">=3.0.6" },
     { name = "apache-airflow-providers-mongo", specifier = ">=5.2.2" },
     { name = "dotenv", specifier = ">=0.9.9" },
+    { name = "exponent-server-sdk", specifier = ">=2.2.0" },
     { name = "numpy", specifier = ">=2.3.2" },
+    { name = "rollbar", specifier = ">=1.3.0" },
 ]
 
 [[package]]
@@ -579,6 +583,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/f5/22/900cb125c76b7aaa450ce02fd727f452243f2e91a61af068b40adba60ea9/email_validator-2.3.0.tar.gz", hash = "sha256:9fc05c37f2f6cf439ff414f8fc46d917929974a82244c20eb10231ba60c54426", size = 51238, upload-time = "2025-08-26T13:09:06.831Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/de/15/545e2b6cf2e3be84bc1ed85613edd75b8aea69807a71c26f4ca6a9258e82/email_validator-2.3.0-py3-none-any.whl", hash = "sha256:80f13f623413e6b197ae73bb10bf4eb0908faf509ad8362c5edeb0be7fd450b4", size = 35604, upload-time = "2025-08-26T13:09:05.858Z" },
+]
+
+[[package]]
+name = "exponent-server-sdk"
+version = "2.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+    { name = "six" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ca/1d/bacc1c009f6a270c098305d83e6da0b54db218f095d8ebd1b4e0a3000abd/exponent_server_sdk-2.2.0.tar.gz", hash = "sha256:162f3b9732a05e8dd8c1263a7ea2aa27c235a2927a4ca08440ba171c95beb449", size = 8669, upload-time = "2025-07-03T15:38:06.119Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e3/6a/9cdf0c704ca375690a0f1543b76bd0fe459c9d1c41ef4c50b2d276e6eb8d/exponent_server_sdk-2.2.0-py3-none-any.whl", hash = "sha256:ee5825baa9870fcdb28f93b3404a5e042c3784d861060e59f7dfd549347a6f0c", size = 8797, upload-time = "2025-07-03T15:38:05.033Z" },
 ]
 
 [[package]]
@@ -1877,6 +1894,18 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/a6/24/ba2bdaf04a19b5331c051b9d480e8daca832bed4aeaa156d6d679044c06c/rignore-0.6.4-pp311-pypy311_pp73-musllinux_1_2_armv7l.whl", hash = "sha256:30f3d688df7eb4850318f1b5864d14f2c5fe5dbf3803ed0fc8329d2a7ad560dc", size = 1136368, upload-time = "2025-07-19T19:24:19.68Z" },
     { url = "https://files.pythonhosted.org/packages/83/48/7cf52353299e02aa629150007fa75f4b91d99b4f2fa536f2e24ead810116/rignore-0.6.4-pp311-pypy311_pp73-musllinux_1_2_i686.whl", hash = "sha256:028f62a7b0a6235bb3f03c9e7f342352e7fa4b3f08c761c72f9de8faee40ed9c", size = 1111714, upload-time = "2025-07-19T19:24:31.717Z" },
     { url = "https://files.pythonhosted.org/packages/84/9c/3881ad34f01942af0cf713e25e476bf851e04e389cc3ff146c3b459ab861/rignore-0.6.4-pp311-pypy311_pp73-musllinux_1_2_x86_64.whl", hash = "sha256:7e6c425603db2c147eace4f752ca3cd4551e7568c9d332175d586c68bcbe3d8d", size = 1122433, upload-time = "2025-07-19T19:24:43.973Z" },
+]
+
+[[package]]
+name = "rollbar"
+version = "1.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d2/43/966a7d64ff2c0901451aa2fcbe205a68528b6c6fbac6760b5ad5a705a944/rollbar-1.3.0.tar.gz", hash = "sha256:519402eac39bcc4fa484821872f6bb18497fb7b6c81167047867d17714d3b379", size = 85300, upload-time = "2025-03-26T15:12:19.274Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c3/d2/b6bf3f24349bc3bc681522fa8c55271923614b47e5e9d923f443523de81a/rollbar-1.3.0-py3-none-any.whl", hash = "sha256:d800c4265a4d5aae547cb3f29e48414b6d4fedaa7f679cd0fd64dac16a1eded3", size = 117183, upload-time = "2025-03-26T15:12:17.828Z" },
 ]
 
 [[package]]

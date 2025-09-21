@@ -18,7 +18,7 @@ jobs:
         run: |
           uv sync
       
-      - name: Install Node.js dependencies
+      - name: Install Node.js dependencies (send emails)
         # New step: Navigate to the subdirectory and install npm packages
         # Replace 'my-node-app' with the actual name of your directory
         working-directory: /home/mateusz/airflow/dags/meals/notifications/send_emails
@@ -31,6 +31,21 @@ jobs:
 
           echo "Installing npm dependencies..."
           npm install
+
+      - name: Install Node.js dependencies (send mobile notifications)
+        # New step: Navigate to the subdirectory and install npm packages
+        # Replace 'my-node-app' with the actual name of your directory
+        working-directory: /home/mateusz/airflow/dags/meals/notifications/mobile_notifications
+        run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          
+          echo "Node version: $(node -v)"
+          echo "npm version: $(npm -v)"
+
+          echo "Installing npm dependencies..."
+          npm install
+      
       - name: Build Node.js Project (Transpile JSX)
         # New step to transpile the JSX source code
         working-directory: /home/mateusz/airflow/dags/meals/notifications/send_emails
