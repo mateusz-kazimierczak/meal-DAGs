@@ -45,26 +45,25 @@ def meal_notifications():
         with open('notifications.json', 'w') as f:
             json.dump(users, f)
 
-    # send_mobile_notifications_task = BashOperator(
-    #     task_id="send_mobile_notifications",
-    #     bash_command=f"/home/mateusz/.nvm/versions/node/v22.19.0/bin/node index.js",
-    #     env={
-    #         "NOTIFICATIONS_PATH": os.path.abspath('notifications.json')
-    #     },
-    #     cwd=mobile_node_project_path,
-    # )
-    # send_email_notifications_task = BashOperator(
-    #     task_id="send_notifications",
-    #     bash_command=f"/home/mateusz/.nvm/versions/node/v22.19.0/bin/node dist/index.js",
-    #     env={
-    #         "RESEND_API_KEY": RESEND_API_KEY,
-    #         "NOTIFICATIONS_PATH": os.path.abspath('notifications.json')
-    #     },
-    #     cwd=email_node_project_path,
-    # )
+    send_mobile_notifications_task = BashOperator(
+        task_id="send_mobile_notifications",
+        bash_command=f"/home/mateusz/.nvm/versions/node/v22.19.0/bin/node index.js",
+        env={
+            "NOTIFICATIONS_PATH": os.path.abspath('notifications.json')
+        },
+        cwd=mobile_node_project_path,
+    )
+    send_email_notifications_task = BashOperator(
+        task_id="send_notifications",
+        bash_command=f"/home/mateusz/.nvm/versions/node/v22.19.0/bin/node dist/index.js",
+        env={
+            "RESEND_API_KEY": RESEND_API_KEY,
+            "NOTIFICATIONS_PATH": os.path.abspath('notifications.json')
+        },
+        cwd=email_node_project_path,
+    )
 
-    get_relevant_users()
-    # get_relevant_users() >> [send_email_notifications_task, send_mobile_notifications_task]
+    get_relevant_users() >> [send_email_notifications_task, send_mobile_notifications_task]
 
 
 dag = meal_notifications()
