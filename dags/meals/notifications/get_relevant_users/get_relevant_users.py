@@ -16,7 +16,7 @@ def ensure_user_in_dict(dict, user):
             'name': user_name,
             'notifications': [],
             'report': None,
-            'device': None if user_send_push else user.get("device")
+            'device': None if not user_send_push else user.get("device")
         }
 
 def is_user_in_week_meals(user, relevant_day_date):
