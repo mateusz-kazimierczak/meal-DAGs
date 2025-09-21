@@ -24,30 +24,30 @@ console.log("Notification data:", notificationData);
 
 // Create the messages that you want to send to clients
 let messages = [];
-for (let notification of notificationData) {
+Object.entries(notificationData).map(([userId, notification]) => {
 
     if (!notification.device || !notification.device.token) {
         console.error(`Notification for user ${notification.userId} is missing a valid push token`);
-        continue;
+        return;
     }
 
     const pushToken = notification.device.token;
 
     // Each push token looks like ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]
 
-  // Check that all your push tokens appear to be valid Expo push tokens
-  if (!Expo.isExpoPushToken(pushToken)) {
-    console.error(`Push token ${pushToken} is not a valid Expo push token`);
-    continue;
-  }
+    // Check that all your push tokens appear to be valid Expo push tokens
+    if (!Expo.isExpoPushToken(pushToken)) {
+        console.error(`Push token ${pushToken} is not a valid Expo push token`);
+        return;
+    }
 
-  // Construct a message (see https://docs.expo.io/push-notifications/sending-notifications/)
-  messages.push({
-    to: pushToken,
-    sound: 'bell.wav',
-    title: notification.text
-  })
-}
+    // Construct a message (see https://docs.expo.io/push-notifications/sending-notifications/)
+    messages.push({
+        to: pushToken,
+        sound: 'bell.wav',
+        title: notification.text
+    })
+});
 
 // The Expo push notification service accepts batches of notifications so
 // that you don't need to send 1000 requests to send 1000 notifications. We
