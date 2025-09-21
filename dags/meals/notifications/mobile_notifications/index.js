@@ -36,7 +36,7 @@ const read_user_from_json = async () => {
     notification.notifications.forEach(alert => {
       messages.push({
         to: pushToken,
-        sound: 'bell.wav',
+        sound: 'bell',
         title: alert.text,
       });
     });
