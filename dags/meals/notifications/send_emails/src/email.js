@@ -155,6 +155,15 @@ const main = {
 
 const halfCol = {
   width: "50%",
+  paddingLeft: "8px",
+  paddingRight: "8px",
+};
+
+// Responsive adjustment for mobile devices
+const mobileMedia = `@media only screen and (max-width: 600px)`;
+const styleSheet = typeof document !== 'undefined' ? document.styleSheets[0] : null;
+if (styleSheet && styleSheet.insertRule) {
+  styleSheet.insertRule(`.halfCol { padding-left: 16px !important; padding-right: 16px !important; }`, styleSheet.cssRules.length);
 }
 
 const mealText = {
