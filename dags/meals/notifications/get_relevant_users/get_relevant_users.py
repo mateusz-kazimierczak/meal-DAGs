@@ -10,7 +10,6 @@ def ensure_user_in_dict(dict, user):
         user_send_email = user.get("notifications", {}).get("notificationTypes", {}).get("email", False)
         user_send_push = user.get("notifications", {}).get("notificationTypes", {}).get("push", False)
 
-        print(f"Adding user {user_id} to notifications dict. Email: {user_email}, Name: {user_name}, Send email: {user_send_email}, Send push: {user_send_push}")
 
         dict[user_id] = {
             'send_email': user_send_email,
@@ -18,7 +17,7 @@ def ensure_user_in_dict(dict, user):
             'name': user_name,
             'notifications': [],
             'report': None,
-            'device': None if not user_send_push else user.get("notificationTypes", {}).get("device")
+            'device': None if not user_send_push else user.get("notifications", {}).get("device")
         }
 
 def is_user_in_week_meals(user, relevant_day_date):
