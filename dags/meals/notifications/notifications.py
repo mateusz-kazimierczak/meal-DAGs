@@ -48,6 +48,9 @@ def meal_notifications():
     send_mobile_notifications_task = BashOperator(
         task_id="send_mobile_notifications",
         bash_command=f"/home/mateusz/.nvm/versions/node/v22.19.0/bin/node index.js",
+        env={
+            "NOTIFICATIONS_PATH": os.path.abspath('notifications.json')
+        },
         cwd=mobile_node_project_path,
     )
     send_email_notifications_task = BashOperator(
