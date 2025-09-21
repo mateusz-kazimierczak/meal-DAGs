@@ -45,7 +45,8 @@ Object.entries(notificationData).map(([userId, notification]) => {
     messages.push({
         to: pushToken,
         sound: 'bell.wav',
-        title: notification.text
+        title: "Hello",
+        body: "Hello"
     })
 });
 
