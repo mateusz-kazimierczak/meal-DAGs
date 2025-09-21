@@ -100,7 +100,7 @@ def get_relevant_users_task():
     else:
         notification_time = "evening"
 
-    print(f"Current day: {current_day}, Notification time: {notification_time}. Hour: {current_hour}. New code!")
+    print(f"Current day: {current_day}, Notification time: {notification_time}. Hour: {current_hour}")
 
     # find users that should be notified
 
@@ -145,10 +145,7 @@ def get_relevant_users_task():
         relevant_day_meals = [meal for meal in relevant_meals if meal['date'] == relevant_day_date.format('D/M/YYYY')][0]
     except IndexError:
         relevant_day_meals = []
-    try:
-        relevant_next_day_meals = [meal for meal in relevant_meals if meal['date'] == relevant_next_day_date.format('D/M/YYYY')][0]
-    except IndexError:
-        relevant_next_day_meals = None
+
 
     try:
         relevant_day_packed_meals = []
@@ -170,6 +167,11 @@ def get_relevant_users_task():
         is_user_in_packed_relevant = is_user_in_day_meals(user, relevant_day_packed_meals)
         is_user_in_packed_relevant_next = is_user_in_week_packed_meals(user, relevant_next_day_date)
 
+        # print all relevant meals for the user
+        print(f"User {user['_id']} - Relevant meals for {relevant_day_label}: {is_user_in_meals_relevant}")
+        print(f"User {user['_id']} - Relevant meals for {relevant_day_label_next}: {is_user_in_meals_relevant_next}")
+        print(f"User {user['_id']} - Relevant packed meals for {relevant_day_label}: {is_user_in_packed_relevant}")
+        print(f"User {user['_id']} - Relevant packed meals for {relevant_day_label_next}: {is_user_in_packed_relevant_next}")
 
         # First handle alerts for the current day
         handle_user_day_notification(user, relevant_day_date, relevant_day_label, "meals", is_user_in_meals_relevant, is_user_in_packed_relevant, notification_objects)
