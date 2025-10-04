@@ -110,7 +110,7 @@ def get_relevant_users_task():
             # make sure the user is active
             {"$or": [
                 {"notifications.notificationTypes.email": True},
-                {"notifications.notificationTypes.mobile": True}
+                {"notifications.notificationTypes.push": True}
             ]},
             # check that he has selected the current notification window
             {f"notifications.schedule.{notification_time}.{current_day}": True},
