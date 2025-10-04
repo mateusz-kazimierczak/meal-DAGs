@@ -160,6 +160,8 @@ def get_relevant_users_task():
 
     for user in users.find(user_query):
 
+        print(f"Processing user {user['firstName']} {user['lastName']} ({user['_id']})")
+
         # First check what meals the user is signed up for
         is_user_in_meals_relevant = is_user_in_week_meals(user, relevant_day_date)
         is_user_in_meals_relevant_next = is_user_in_week_meals(user, relevant_next_day_date)

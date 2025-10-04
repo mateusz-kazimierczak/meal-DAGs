@@ -39,6 +39,7 @@ def meal_notifications():
         users = get_relevant_users_task()
 
         # print formatted json
+        print("Relevant users:")
         print(json.dumps(users, indent=4))
 
         # save dict with notifications to json
