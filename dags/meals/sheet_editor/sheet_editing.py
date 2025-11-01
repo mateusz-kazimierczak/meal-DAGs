@@ -1,11 +1,15 @@
 from airflow.sdk import DAG, task
-import pendulum
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
-import gspread
-from google.oauth2.service_account import Credentials
+from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.utils.dates import days_ago
+from google.oauth2.service_account import Credentials # this one
+import gspread # this one
+import pendulum
 import datetime
+
+#TODO: Add all important dependencies to the u.v. lock file using the article Mateusz sent
+
+#TODO: After the DAG shows up on the server, put credentials on rasberry pi. (Later not on my own)
+
 
 
 # Timezone
@@ -28,8 +32,8 @@ with DAG(
     def extract_meal_data(ds=None):
         print("✅ Packages ready to go!")
 
-        uri = #TODO: Place proper URI here to access mongodb.
-        client = MongoClient(uri, server_api=ServerApi("1"))
+        hook = MongoHook(mongo_conn_id="mongoid")
+        client = hook.get_conn()
 
         try:
             client.admin.command("ping")
