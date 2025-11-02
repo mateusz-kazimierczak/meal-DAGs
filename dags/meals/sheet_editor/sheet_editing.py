@@ -1,7 +1,8 @@
 from airflow.sdk import DAG, task
 from airflow.providers.mongo.hooks.mongo import MongoHook
-from google.oauth2.service_account import Credentials # this one
-import gspread # this one
+from google.oauth2.service_account import Credentials 
+from airflow.timetables.trigger import MultipleCronTriggerTimetable
+import gspread 
 import pendulum
 import datetime
 
@@ -19,9 +20,7 @@ with DAG(
         dag_id="meal_sheet_update_dag",
         description="Fetch meal data from MongoDB and update Google Sheets",
         schedule=MultipleCronTriggerTimetable(
-        "30 7 * * *",   # 7:30 AM
-        "0 12 * * *",   # 12:00 PM
-        "30 19 * * *",  # 7:30 PM
+        "45 8 * * *",   # 8:45 AM
         timezone=local_tz,
     ),
         start_date=pendulum.datetime(2025, 11, 1, tz="UTC"),
