@@ -100,6 +100,10 @@ with DAG(
         cell = monthSheet.findall(str(emDashDate))[0]
         originRow, originCol = cell.row, cell.col
 
+    
+        print({dataDictionary[meal_key]} for meal_key in dataDictionary)
+        print("Over here!")
+
         dietIndices = {"lactose free": 1, "seafood": 2, "no fish sesame": 3, "no peanuts": 4, "no white fish": 5}
 
         def update_meal_block(meal_key, row_offset):
@@ -112,10 +116,15 @@ with DAG(
                 monthSheet.update_cell(originRow + row_offset, originCol + dietIndices[diet], True)
 
         update_meal_block("L", 1)
+        print(f"This is Lunch: {dataDictionary['L']}")
         update_meal_block("S", 2)
+        print(f"This is Supper: {dataDictionary['S']}")
         update_meal_block("P1", 5)
+        print(f"This is P1: {dataDictionary['P1']}")
         update_meal_block("P2", 6)
+        print(f"This is P2: {dataDictionary['P2']}")
         update_meal_block("PS", 7)
+        print(f"This is PS: {dataDictionary['PS']}")
 
         print("✅ Sheet updated successfully!")
         print("\n==========================================")
