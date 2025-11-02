@@ -1,6 +1,5 @@
 from airflow.sdk import DAG, task
 from airflow.providers.mongo.hooks.mongo import MongoHook
-from airflow.utils.dates import days_ago
 from google.oauth2.service_account import Credentials # this one
 import gspread # this one
 import pendulum
