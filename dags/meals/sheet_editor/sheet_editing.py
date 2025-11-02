@@ -32,7 +32,7 @@ with DAG(
     # Task 1: Extract meal data
     # =====================
     @task()
-    def extract_meal_data(ds=None):
+    def extract_meal_data(dag_run=None):
         print("✅ Packages ready to go!")
 
         hook = MongoHook(mongo_conn_id="mongoid")
@@ -48,8 +48,7 @@ with DAG(
         db = client["test"]
         meal_collection = db["days"]
 
-        date_obj = datetime.datetime.strptime(ds, "%Y-%m-%d")
-        date = date_obj.strftime("%d/%m/%Y")
+        date = dag_run.logical_date.format('D/M/YYYY')
 
 
         doc = meal_collection.find_one({"date": date})
