@@ -95,7 +95,7 @@ with DAG(
         print(f"Updating sheet for date: {emDashDate}")
         clientIndex = int(emDashDate.split("-")[1]) - 8
         print(f"Client Index: {clientIndex}")
-        monthSheet = client.open("Test Week of EC Meal Sheet 2025").get_worksheet(clientIndex)
+        monthSheet = client.open_by_key("1-R1Fk2E7_T53EFeM_TdFYqzmtiDxdEXYQZClrpTphOA").get_worksheet(clientIndex)
 
         cell = monthSheet.findall(str(emDashDate))[0]
         originRow, originCol = cell.row, cell.col
