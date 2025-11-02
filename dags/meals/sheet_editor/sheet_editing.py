@@ -6,11 +6,6 @@ import gspread
 import pendulum
 import datetime
 
-#TODO: Add all important dependencies to the u.v. lock file using the article Mateusz sent
-
-#TODO: After the DAG shows up on the server, put credentials on rasberry pi. (Later not on my own)
-
-
 
 # Timezone
 local_tz = pendulum.timezone("America/New_York")
@@ -100,7 +95,7 @@ with DAG(
         print(f"Updating sheet for date: {emDashDate}")
         clientIndex = int(emDashDate.split("-")[1]) - 8
         print(f"Client Index: {clientIndex}")
-        monthSheet = client.open("Testing of EC Meal Sheet 2025").get_worksheet(clientIndex)
+        monthSheet = client.open("Test Week of EC Meal Sheet 2025").get_worksheet(clientIndex)
 
         cell = monthSheet.findall(str(emDashDate))[0]
         originRow, originCol = cell.row, cell.col
