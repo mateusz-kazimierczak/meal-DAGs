@@ -97,7 +97,9 @@ with DAG(
         dataDictionary = data_bundle["data"]
 
         emDashDate = date.replace("/", "-")
+        print(f"Updating sheet for date: {emDashDate}")
         clientIndex = int(emDashDate.split("-")[1]) - 8
+        print(f"Client Index: {clientIndex}")
         monthSheet = client.open("Testing of EC Meal Sheet 2025").get_worksheet(clientIndex)
 
         cell = monthSheet.findall(str(emDashDate))[0]
