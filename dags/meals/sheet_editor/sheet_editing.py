@@ -18,7 +18,12 @@ local_tz = pendulum.timezone("America/New_York")
 with DAG(
         dag_id="meal_sheet_update_dag",
         description="Fetch meal data from MongoDB and update Google Sheets",
-        schedule_interval="@daily",
+        schedule=MultipleCronTriggerTimetable(
+        "30 7 * * *",   # 7:30 AM
+        "0 12 * * *",   # 12:00 PM
+        "30 19 * * *",  # 7:30 PM
+        timezone=local_tz,
+    ),,
         start_date=pendulum.datetime(2025, 11, 1, tz="UTC"),
         catchup=False,
         tags=["meals", "google_sheets", "mongodb"],
