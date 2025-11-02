@@ -104,7 +104,7 @@ with DAG(
         print({dataDictionary[meal_key]} for meal_key in dataDictionary)
         print("Over here!")
 
-        dietIndices = {"lactose free": 1, "seafood": 2, "no fish sesame": 3, "no peanuts": 4} # TODO: Configure "no white fish": 5
+        dietIndices = {"lactose free": 1, "seafood": 2, "no fish sesame": 3, "no peanuts": 4, "no white fish": 6} 
 
         def update_meal_block(meal_key, row_offset):
 
