@@ -86,7 +86,7 @@ with DAG(
             "https://www.googleapis.com/auth/spreadsheets",
             "https://www.googleapis.com/auth/drive",
         ]
-        SERVICE_ACCOUNT_FILE = #TODO: Place proper json file for login credentials
+        SERVICE_ACCOUNT_FILE = "TODO: Place proper json file for login credentials"
 
         creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
         client = gspread.authorize(creds)
