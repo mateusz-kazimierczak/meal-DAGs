@@ -23,7 +23,7 @@ with DAG(
         "0 12 * * *",   # 12:00 PM
         "30 19 * * *",  # 7:30 PM
         timezone=local_tz,
-    ),,
+    ),
         start_date=pendulum.datetime(2025, 11, 1, tz="UTC"),
         catchup=False,
         tags=["meals", "google_sheets", "mongodb"],
