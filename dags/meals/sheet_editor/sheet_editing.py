@@ -48,7 +48,7 @@ with DAG(
         db = client["test"]
         meal_collection = db["days"]
 
-        date = pendulum.instance(dag_run.logical_date).in_timezone("America/Toronto").format("DD/MM/YYYY")
+        date = pendulum.instance(dag_run.logical_date).in_timezone("America/Toronto").format("D/M/YYYY")
         print(date)
 
         doc = meal_collection.find_one({"date": date})
