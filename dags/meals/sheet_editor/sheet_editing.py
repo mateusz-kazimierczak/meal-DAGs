@@ -98,6 +98,8 @@ with DAG(
         monthSheet = client.open_by_key("1-R1Fk2E7_T53EFeM_TdFYqzmtiDxdEXYQZClrpTphOA").get_worksheet(clientIndex)
 
         cell = monthSheet.findall(str(emDashDate))[0]
+        print(f"Cell found: {cell}")
+        print(f"Found date cell at Row: {cell.row}, Column: {cell.col}")
         originRow, originCol = cell.row, cell.col
 
     
