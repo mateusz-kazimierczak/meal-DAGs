@@ -15,7 +15,7 @@ def get_sheets_service(file_path="/home/mateusz/secrets/sheets_sa.json"):
     # Load your credentials here. This is a placeholder for a robust auth flow.
     # For a full auth implementation, refer to the Google Sheets API Python Quickstart guide.
     if os.path.exists(file_path):
-        creds = Credentials.from_authorized_user_file(file_path, SCOPES)
+        creds = Credentials.from_service_account_file(file_path, SCOPES)
     if not creds or not creds.valid:
         # Code to refresh or prompt for login would go here
         pass
