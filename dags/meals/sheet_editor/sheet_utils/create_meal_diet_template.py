@@ -98,7 +98,26 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
     date_range = f'{sheet_name}!{start_col_letter}{start_row - 1}'
     batch_data.append({
         'range': date_range,
-        'values': [[f"Data for Date: {date_val.format('D-M-YYYY')}"]]
+        'values': [[f"Meals for date: {date_val.format('D-M-YYYY')}"]]
+    })
+
+    # Add "Prediction for Tomorrow" section
+    tomorrow_data = input_data.get("tomorrow", {})
+    prediction_start_row = end_row + 2  # 2 rows below the main table
+    
+    # Prepare tomorrow's prediction data
+    prediction_rows = [
+        ["Prediction for Tomorrow"],
+        ["Breakfast", tomorrow_data.get("B", {}).get("number", 0)],
+        ["Breakfast with snack", ""],  # Leave blank as requested
+        ["Lunch", tomorrow_data.get("L", {}).get("number", 0)],
+        ["Supper", tomorrow_data.get("S", {}).get("number", 0)]
+    ]
+    
+    prediction_range = f'{sheet_name}!{start_col_letter}{prediction_start_row}:{chr(ord(start_col_letter) + 1)}{prediction_start_row + len(prediction_rows) - 1}'
+    batch_data.append({
+        'range': prediction_range,
+        'values': prediction_rows
     })
 
     # 6. Execute the batch update for values
@@ -128,6 +147,10 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         # Convert column letters to indices
         start_col_idx = start_col_index
         end_col_idx = start_col_index + len(headers) - 1
+        
+        # Calculate prediction section rows
+        prediction_start_row = end_row + 2
+        prediction_end_row = prediction_start_row + 5  # Title + 4 rows of data
         
         formatting_requests = [
             # Bold header row
@@ -289,6 +312,93 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                         'pixelSize': 150  # Set minimum column width
                     },
                     'fields': 'pixelSize'
+                }
+            },
+            # Format "Prediction for Tomorrow" title
+            {
+                'repeatCell': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'startRowIndex': prediction_start_row - 1,
+                        'endRowIndex': prediction_start_row,
+                        'startColumnIndex': start_col_idx,
+                        'endColumnIndex': start_col_idx + 2
+                    },
+                    'cell': {
+                        'userEnteredFormat': {
+                            'textFormat': {
+                                'bold': True,
+                                'fontSize': 11
+                            },
+                            'backgroundColor': {
+                                'red': 0.85,
+                                'green': 0.85,
+                                'blue': 0.85
+                            }
+                        }
+                    },
+                    'fields': 'userEnteredFormat(textFormat,backgroundColor)'
+                }
+            },
+            # Add border around prediction section
+            {
+                'updateBorders': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'startRowIndex': prediction_start_row - 1,
+                        'endRowIndex': prediction_end_row - 1,
+                        'startColumnIndex': start_col_idx,
+                        'endColumnIndex': start_col_idx + 2
+                    },
+                    'top': {
+                        'style': 'SOLID',
+                        'width': 2,
+                        'color': {'red': 0, 'green': 0, 'blue': 0}
+                    },
+                    'bottom': {
+                        'style': 'SOLID',
+                        'width': 2,
+                        'color': {'red': 0, 'green': 0, 'blue': 0}
+                    },
+                    'left': {
+                        'style': 'SOLID',
+                        'width': 2,
+                        'color': {'red': 0, 'green': 0, 'blue': 0}
+                    },
+                    'right': {
+                        'style': 'SOLID',
+                        'width': 2,
+                        'color': {'red': 0, 'green': 0, 'blue': 0}
+                    },
+                    'innerHorizontal': {
+                        'style': 'SOLID',
+                        'width': 1,
+                        'color': {'red': 0.7, 'green': 0.7, 'blue': 0.7}
+                    },
+                    'innerVertical': {
+                        'style': 'SOLID',
+                        'width': 1,
+                        'color': {'red': 0.7, 'green': 0.7, 'blue': 0.7}
+                    }
+                }
+            },
+            # Center align prediction data cells
+            {
+                'repeatCell': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'startRowIndex': prediction_start_row,
+                        'endRowIndex': prediction_end_row - 1,
+                        'startColumnIndex': start_col_idx,
+                        'endColumnIndex': start_col_idx + 2
+                    },
+                    'cell': {
+                        'userEnteredFormat': {
+                            'horizontalAlignment': 'CENTER',
+                            'verticalAlignment': 'MIDDLE'
+                        }
+                    },
+                    'fields': 'userEnteredFormat(horizontalAlignment,verticalAlignment)'
                 }
             }
         ]
