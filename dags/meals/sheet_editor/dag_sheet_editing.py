@@ -5,7 +5,7 @@ from googleapiclient.errors import HttpError
 
 import pendulum
 import datetime
-from dags.meals._common.mongo_utils.get_future_meals import get_future_meals
+from meals._common.mongo_utils.get_future_meals import get_future_meals
 from meals._common.mongo_utils.get_meals_per_day import get_meals_per_day, ge
 from meals.sheet_editor.sheet_utils.ensure_sheet_exists import ensure_sheet_exists
 from meals.sheet_editor.sheet_utils.get_last_sheet_row import get_last_row_number_in_column
