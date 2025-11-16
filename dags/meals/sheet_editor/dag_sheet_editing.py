@@ -69,7 +69,7 @@ with DAG(
             start_row = get_last_row_number_in_column(service, SPREADSHEET_ID, sheet_name, column='B') + 3
             
             # 3. Add the meal block to the sheet
-            create_meal_template(service, SPREADSHEET_ID, sheet_name, start_row, )
+            create_meal_template(service, SPREADSHEET_ID, sheet_name, start_row, data_bundle)
 
         except HttpError as err:
             print(f"An error occurred: {err}")
