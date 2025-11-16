@@ -29,8 +29,12 @@ def get_future_meals(date, mongo_conn_id="mongoid", db_name="test", collection_n
     active_users = meal_collection.find({"isActive": True})
 
     total_counts = {"B": 0, "L": 0, "S": 0}
+
+    print(f"Calculating future meals for date: {date.to_date_string()} (Day index: {day_index})")
     
     for user in active_users:
+
+        print(user)
 
         # Get the meals for the specified day
         meals_for_day = user['meals'][day_index]
