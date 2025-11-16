@@ -5,7 +5,7 @@ from googleapiclient.errors import HttpError
 
 import pendulum
 import datetime
-from meals.sheet_editor.sheet_utils import ensure_sheet_exists
+from meals.sheet_editor.sheet_utils.ensure_sheet_exists import ensure_sheet_exists
 from meals.sheet_editor.sheet_utils.get_last_sheet_row import get_last_row_number_in_column
 from meals.sheet_editor.sheet_utils.get_service import get_sheets_service
 from meals.sheet_editor.sheet_utils.create_meal_diet_template import create_meal_template
@@ -54,12 +54,12 @@ with DAG(
             raise ValueError(f"No document found for date {date.format('D/M/YYYY')}")
 
         dataDictionary = {
-            "B": {"number": len(doc["meals"][0]), "hasDiet": []},
-            "L": {"number": len(doc["meals"][1]), "hasDiet": []},
-            "S": {"number": len(doc["meals"][2]), "hasDiet": []},
-            "P1": {"number": len(doc["packedMeals"][0]), "hasDiet": []},
-            "P2": {"number": len(doc["packedMeals"][1]), "hasDiet": []},
-            "PS": {"number": len(doc["packedMeals"][2]), "hasDiet": []},
+            "B": {"number": len(doc["meals"][0]), "hasDiet": {}},
+            "L": {"number": len(doc["meals"][1]), "hasDiet": {}},
+            "S": {"number": len(doc["meals"][2]), "hasDiet": {}},
+            "P1": {"number": len(doc["packedMeals"][0]), "hasDiet": {}},
+            "P2": {"number": len(doc["packedMeals"][1]), "hasDiet": {}},
+            "PS": {"number": len(doc["packedMeals"][2]), "hasDiet": {}},
         }
 
         for key, meal_list in zip(
@@ -68,7 +68,10 @@ with DAG(
         ):
             for user in meal_list:
                 if user["diet"] is not None:
-                    dataDictionary[key]["hasDiet"].append(user["diet"])
+                    diet = user["diet"]
+                    if diet not in dataDictionary[key]["hasDiet"]:
+                        dataDictionary[key]["hasDiet"][diet] = 0
+                    dataDictionary[key]["hasDiet"][diet] += 1
 
         print(dataDictionary)
 

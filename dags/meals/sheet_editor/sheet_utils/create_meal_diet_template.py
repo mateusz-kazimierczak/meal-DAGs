@@ -28,7 +28,7 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_col_index, i
 
     # Extract all unique diet types from the data dictionary to create columns
     # We will sort them alphabetically for consistent column order
-    all_diets = sorted(list(set(diet for meal_key in data_dict for diet in data_dict[meal_key]["hasDiet"])))
+    all_diets = sorted(list(set(diet for meal_key in data_dict for diet in data_dict[meal_key]["hasDiet"].keys())))
 
     headers = ["Meal Type", "Total"] + all_diets
 
@@ -41,17 +41,17 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_col_index, i
         meal_name = meal_types_map.get(meal_key_short, meal_key_short)
         number_of_meals = meal_details["number"]
         grand_total_meals += number_of_meals
-        has_diets = set(meal_details["hasDiet"])
+        has_diets = meal_details["hasDiet"]  # This is now a dict with counts
 
-        # Build the row: [Meal Name, Total Count, Checkboxes/Counts for each diet...]
+        # Build the row: [Meal Name, Total Count, Counts for each diet...]
         row = [meal_name, number_of_meals]
         for diet in all_diets:
-            # Check if this meal type has this diet restriction
+            # Check if this meal type has this diet restriction and add the count
             if diet in has_diets:
-                row.append(number_of_meals) # Add the number of meals adhering to the diet
-                diet_totals[diet] += number_of_meals
+                row.append(has_diets[diet])  # Add the actual count for this diet
+                diet_totals[diet] += has_diets[diet]
             else:
-                row.append("") # Leave blank
+                row.append("")  # Leave blank
 
         table_data.append(row)
 
