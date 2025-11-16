@@ -42,7 +42,9 @@ with DAG(
         tomorrow = today.add(days=1)
         tomorrow_meals = get_future_meals(tomorrow)
 
-        return {"date": today, "today": today_meals, "tomorrow": tomorrow_meals}
+        data_bundle = {"date": today, "today": today_meals, "tomorrow": tomorrow_meals}
+
+        return data_bundle
 
     # =====================
     # Task 2: Update Google Sheet
