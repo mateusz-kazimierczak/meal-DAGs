@@ -93,7 +93,7 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         'values': [[f"Data for Date: {date_val.format('D-M-YYYY')}"]]
     })
 
-    # 6. Execute the batch update
+    # 6. Execute the batch update for values
     body = {
         'valueInputOption': 'USER_ENTERED',
         'data': batch_data
@@ -106,5 +106,170 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
     ).execute()
     
     print(f"Template created and {result.get('totalUpdatedCells')} cells updated successfully.")
+    
+    # 7. Apply formatting to make the table look better
+    # Get sheet ID (needed for formatting requests)
+    sheet_metadata = service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+    sheet_id = None
+    for sheet in sheet_metadata.get('sheets', []):
+        if sheet.get('properties', {}).get('title') == sheet_name:
+            sheet_id = sheet.get('properties', {}).get('sheetId')
+            break
+    
+    if sheet_id is not None:
+        # Convert column letters to indices
+        start_col_idx = start_col_index
+        end_col_idx = start_col_index + len(headers) - 1
+        
+        formatting_requests = [
+            # Bold header row
+            {
+                'repeatCell': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'startRowIndex': start_row - 1,
+                        'endRowIndex': start_row,
+                        'startColumnIndex': start_col_idx,
+                        'endColumnIndex': end_col_idx + 1
+                    },
+                    'cell': {
+                        'userEnteredFormat': {
+                            'textFormat': {
+                                'bold': True,
+                                'fontSize': 11
+                            },
+                            'backgroundColor': {
+                                'red': 0.85,
+                                'green': 0.85,
+                                'blue': 0.85
+                            },
+                            'horizontalAlignment': 'CENTER',
+                            'verticalAlignment': 'MIDDLE'
+                        }
+                    },
+                    'fields': 'userEnteredFormat(textFormat,backgroundColor,horizontalAlignment,verticalAlignment)'
+                }
+            },
+            # Bold and highlight grand totals row
+            {
+                'repeatCell': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'startRowIndex': end_row - 1,
+                        'endRowIndex': end_row,
+                        'startColumnIndex': start_col_idx,
+                        'endColumnIndex': end_col_idx + 1
+                    },
+                    'cell': {
+                        'userEnteredFormat': {
+                            'textFormat': {
+                                'bold': True
+                            },
+                            'backgroundColor': {
+                                'red': 0.95,
+                                'green': 0.95,
+                                'blue': 0.85
+                            }
+                        }
+                    },
+                    'fields': 'userEnteredFormat(textFormat,backgroundColor)'
+                }
+            },
+            # Bold date/title row
+            {
+                'repeatCell': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'startRowIndex': start_row - 2,
+                        'endRowIndex': start_row - 1,
+                        'startColumnIndex': start_col_idx,
+                        'endColumnIndex': end_col_idx + 1
+                    },
+                    'cell': {
+                        'userEnteredFormat': {
+                            'textFormat': {
+                                'bold': True,
+                                'fontSize': 12
+                            }
+                        }
+                    },
+                    'fields': 'userEnteredFormat(textFormat)'
+                }
+            },
+            # Add borders around the entire table
+            {
+                'updateBorders': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'startRowIndex': start_row - 1,
+                        'endRowIndex': end_row,
+                        'startColumnIndex': start_col_idx,
+                        'endColumnIndex': end_col_idx + 1
+                    },
+                    'top': {
+                        'style': 'SOLID',
+                        'width': 2,
+                        'color': {'red': 0, 'green': 0, 'blue': 0}
+                    },
+                    'bottom': {
+                        'style': 'SOLID',
+                        'width': 2,
+                        'color': {'red': 0, 'green': 0, 'blue': 0}
+                    },
+                    'left': {
+                        'style': 'SOLID',
+                        'width': 2,
+                        'color': {'red': 0, 'green': 0, 'blue': 0}
+                    },
+                    'right': {
+                        'style': 'SOLID',
+                        'width': 2,
+                        'color': {'red': 0, 'green': 0, 'blue': 0}
+                    },
+                    'innerHorizontal': {
+                        'style': 'SOLID',
+                        'width': 1,
+                        'color': {'red': 0.7, 'green': 0.7, 'blue': 0.7}
+                    },
+                    'innerVertical': {
+                        'style': 'SOLID',
+                        'width': 1,
+                        'color': {'red': 0.7, 'green': 0.7, 'blue': 0.7}
+                    }
+                }
+            },
+            # Center align all cells in the table
+            {
+                'repeatCell': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'startRowIndex': start_row,
+                        'endRowIndex': end_row,
+                        'startColumnIndex': start_col_idx,
+                        'endColumnIndex': end_col_idx + 1
+                    },
+                    'cell': {
+                        'userEnteredFormat': {
+                            'horizontalAlignment': 'CENTER',
+                            'verticalAlignment': 'MIDDLE'
+                        }
+                    },
+                    'fields': 'userEnteredFormat(horizontalAlignment,verticalAlignment)'
+                }
+            }
+        ]
+        
+        # Apply formatting
+        format_body = {
+            'requests': formatting_requests
+        }
+        
+        service.spreadsheets().batchUpdate(
+            spreadsheetId=spreadsheet_id,
+            body=format_body
+        ).execute()
+        
+        print("Formatting applied successfully.")
+    
     return result
 
