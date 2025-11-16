@@ -1,14 +1,16 @@
 from googleapiclient.discovery import build
 import string
 
-def create_meal_template(service, spreadsheet_id, sheet_name, start_col_index, input_data):
+def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, input_data):
     """
-    Creates a meal and diet summary table in a Google Sheet starting at a specific column index.
+    Creates a meal and diet summary table in a Google Sheet starting at a specific row index.
+    The table will always start at column B.
 
     Args:
         service: Authorized Google Sheets API service instance.
         spreadsheet_id: The ID of the target spreadsheet.
-        start_col_index: The 0-based index of the column where the table should start (e.g., 0 for column A).
+        sheet_name: The name of the sheet to update.
+        start_row_index: The 1-based index of the row where the table should start (e.g., 4 for row 4).
         input_data: A dictionary containing 'date' and 'dataDictionary'.
     """
     date_val = input_data.get("date", "N/A")
@@ -60,9 +62,11 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_col_index, i
     table_data.append(grand_totals_row)
 
     # 4. Determine the A1 notation for the target range
-    start_col_letter = string.ascii_uppercase[start_col_index % 26]
+    # Always start at column B (index 1)
+    start_col_index = 1  # Column B
+    start_col_letter = 'B'
     end_col_letter = string.ascii_uppercase[(start_col_index + len(headers) - 1) % 26]
-    start_row = 4 # Assuming we start around row 4 (like the image)
+    start_row = start_row_index
 
     # We need enough rows for all meal types + totals + headers (total rows + 1 header row)
     num_rows = len(table_data) + 1
