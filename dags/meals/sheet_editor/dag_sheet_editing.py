@@ -5,10 +5,10 @@ from googleapiclient.errors import HttpError
 
 import pendulum
 import datetime
-from dags.meals.sheet_editor.sheet_utils import ensure_sheet_exists
-from dags.meals.sheet_editor.sheet_utils.get_last_sheet_row import get_last_row_number_in_column
-from dags.meals.sheet_editor.sheet_utils.get_service import get_sheets_service
-from dags.meals.sheet_editor.sheet_utils.create_meal_diet_template import add_meal_block, create_meal_template
+from meals.sheet_editor.sheet_utils import ensure_sheet_exists
+from meals.sheet_editor.sheet_utils.get_last_sheet_row import get_last_row_number_in_column
+from meals.sheet_editor.sheet_utils.get_service import get_sheets_service
+from meals.sheet_editor.sheet_utils.create_meal_diet_template import add_meal_block, create_meal_template
 
 
 
