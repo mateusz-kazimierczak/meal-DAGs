@@ -108,10 +108,10 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
     # Prepare tomorrow's prediction data
     prediction_rows = [
         ["Prediction for Tomorrow"],
-        ["Breakfast", tomorrow_data.get("B", {}).get("number", 0)],
+        ["Breakfast", tomorrow_data.get("B")],
         ["Breakfast with snack", ""],  # Leave blank as requested
-        ["Lunch", tomorrow_data.get("L", {}).get("number", 0)],
-        ["Supper", tomorrow_data.get("S", {}).get("number", 0)]
+        ["Lunch", tomorrow_data.get("L")],
+        ["Supper", tomorrow_data.get("S")]
     ]
     
     prediction_range = f'{sheet_name}!{start_col_letter}{prediction_start_row}:{chr(ord(start_col_letter) + 1)}{prediction_start_row + len(prediction_rows) - 1}'
