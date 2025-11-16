@@ -5,6 +5,7 @@ from googleapiclient.errors import HttpError
 
 import pendulum
 import datetime
+from dags.meals._common.mongo_utils.get_meals_per_day import get_meals_per_day
 from meals.sheet_editor.sheet_utils.ensure_sheet_exists import ensure_sheet_exists
 from meals.sheet_editor.sheet_utils.get_last_sheet_row import get_last_row_number_in_column
 from meals.sheet_editor.sheet_utils.get_service import get_sheets_service
@@ -34,48 +35,13 @@ with DAG(
     @task()
     def extract_meal_data(dag_run=None):
 
-        hook = MongoHook(mongo_conn_id="mongoid")
-        client = hook.get_conn()
+        today = pendulum.instance(dag_run.logical_date).in_timezone("America/Toronto")
+        today_meals = get_meals_per_day(today)
 
-        try:
-            client.admin.command("ping")
-            print("✅ Pinged your deployment. Successfully connected to MongoDB!\n")
-        except Exception as e:
-            print(f"❌ Connection failed: {e}")
-            raise
+        tomorrow = today.add(days=1)
+        tomorrow_meals = get_meals_per_day(tomorrow)
 
-        db = client["test"]
-        meal_collection = db["days"]
-
-        date = pendulum.instance(dag_run.logical_date).in_timezone("America/Toronto")
-
-        doc = meal_collection.find_one({"date": date.format("D/M/YYYY")})
-        if not doc:
-            raise ValueError(f"No document found for date {date.format('D/M/YYYY')}")
-
-        dataDictionary = {
-            "B": {"number": len(doc["meals"][0]), "hasDiet": {}},
-            "L": {"number": len(doc["meals"][1]), "hasDiet": {}},
-            "S": {"number": len(doc["meals"][2]), "hasDiet": {}},
-            "P1": {"number": len(doc["packedMeals"][0]), "hasDiet": {}},
-            "P2": {"number": len(doc["packedMeals"][1]), "hasDiet": {}},
-            "PS": {"number": len(doc["packedMeals"][2]), "hasDiet": {}},
-        }
-
-        for key, meal_list in zip(
-                ["B", "L", "S", "P1", "P2", "PS"],
-                doc["meals"] + doc["packedMeals"],
-        ):
-            for user in meal_list:
-                if user["diet"] is not None:
-                    diet = user["diet"]
-                    if diet not in dataDictionary[key]["hasDiet"]:
-                        dataDictionary[key]["hasDiet"][diet] = 0
-                    dataDictionary[key]["hasDiet"][diet] += 1
-
-        print(dataDictionary)
-
-        return {"date": date, "data": dataDictionary}
+        return {"date": today, "today": today_meals, "tomorrow": tomorrow_meals}
 
     # =====================
     # Task 2: Update Google Sheet
@@ -103,7 +69,7 @@ with DAG(
             start_row = get_last_row_number_in_column(service, SPREADSHEET_ID, sheet_name, column='B') + 3
             
             # 3. Add the meal block to the sheet
-            create_meal_template(service, SPREADSHEET_ID, sheet_name, start_row, data_bundle)
+            create_meal_template(service, SPREADSHEET_ID, sheet_name, start_row, )
 
         except HttpError as err:
             print(f"An error occurred: {err}")

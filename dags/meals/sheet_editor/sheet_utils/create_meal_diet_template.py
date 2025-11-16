@@ -11,10 +11,10 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         spreadsheet_id: The ID of the target spreadsheet.
         sheet_name: The name of the sheet to update.
         start_row_index: The 1-based index of the row where the table should start (e.g., 4 for row 4).
-        input_data: A dictionary containing 'date' and 'dataDictionary'.
+        input_data: A dictionary containing 'date', 'today' and 'tomorrow'.
     """
     date_val = input_data.get("date", "N/A")
-    data_dict = input_data.get("data", {})
+    data_dict = input_data.get("today", {})
 
     # 1. Define Headers and Diets
     meal_types_map = {
@@ -274,6 +274,21 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                         'startIndex': start_col_idx,
                         'endIndex': end_col_idx + 1
                     }
+                }
+            },
+            # Add padding to columns for better spacing
+            {
+                'updateDimensionProperties': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'dimension': 'COLUMNS',
+                        'startIndex': start_col_idx,
+                        'endIndex': end_col_idx + 1
+                    },
+                    'properties': {
+                        'pixelSize': 150  # Set minimum column width
+                    },
+                    'fields': 'pixelSize'
                 }
             }
         ]
