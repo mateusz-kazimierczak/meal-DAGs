@@ -51,7 +51,7 @@ with DAG(
 
         doc = meal_collection.find_one({"date": date.format("D/M/YYYY")})
         if not doc:
-            raise ValueError(f"No document found for date {date.format("D/M/YYYY")}")
+            raise ValueError(f"No document found for date {date.format('D/M/YYYY')}")
 
         dataDictionary = {
             "B": {"number": len(doc["meals"][0]), "hasDiet": []},
