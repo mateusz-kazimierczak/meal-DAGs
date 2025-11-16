@@ -39,11 +39,19 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
     grand_total_meals = 0
     diet_totals = {diet: 0 for diet in all_diets}
 
-    for meal_key_short, meal_details in data_dict.items():
-        meal_name = meal_types_map.get(meal_key_short, meal_key_short)
-        number_of_meals = meal_details["number"]
+    # Iterate through all meal types in the defined order, not just those with data
+    for meal_key_short, meal_name in meal_types_map.items():
+        # Get meal details if they exist, otherwise use default empty values
+        if meal_key_short in data_dict:
+            meal_details = data_dict[meal_key_short]
+            number_of_meals = meal_details["number"]
+            has_diets = meal_details["hasDiet"]  # This is now a dict with counts
+        else:
+            # No data for this meal type, show as empty
+            number_of_meals = 0
+            has_diets = {}
+        
         grand_total_meals += number_of_meals
-        has_diets = meal_details["hasDiet"]  # This is now a dict with counts
 
         # Build the row: [Meal Name, Total Count, Counts for each diet...]
         row = [meal_name, number_of_meals]
@@ -255,6 +263,17 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                         }
                     },
                     'fields': 'userEnteredFormat(horizontalAlignment,verticalAlignment)'
+                }
+            },
+            # Auto-resize columns to fit content
+            {
+                'autoResizeDimensions': {
+                    'dimensions': {
+                        'sheetId': sheet_id,
+                        'dimension': 'COLUMNS',
+                        'startIndex': start_col_idx,
+                        'endIndex': end_col_idx + 1
+                    }
                 }
             }
         ]
