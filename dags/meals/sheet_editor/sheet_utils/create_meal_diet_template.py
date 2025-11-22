@@ -150,6 +150,25 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         prediction_end_row = prediction_start_row + 5  # Title + 4 rows of data
         
         formatting_requests = [
+            # Add checkbox data validation to diet columns
+            {
+                'setDataValidation': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'startRowIndex': start_row,
+                        'endRowIndex': end_row - 1,  # Exclude the totals row
+                        'startColumnIndex': start_col_idx + 2,  # Skip "Meal Type" and "Total" columns
+                        'endColumnIndex': end_col_idx + 1
+                    },
+                    'rule': {
+                        'condition': {
+                            'type': 'BOOLEAN'
+                        },
+                        'strict': True,
+                        'showCustomUi': True
+                    }
+                }
+            },
             # Bold header row
             {
                 'repeatCell': {
