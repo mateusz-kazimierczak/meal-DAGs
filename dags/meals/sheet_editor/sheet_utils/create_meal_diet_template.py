@@ -21,9 +21,6 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         "B": "Breakfast",
         "L": "Lunch",
         "S": "Supper at table",
-        "P1": "Pack Lunch P1",
-        "P2": "Pack Lunch P2",
-        "PS": "Pack Supper",
         "LS": "Late Supper (normal)",
         "LSC": "Late Supper in container",
     }
@@ -53,15 +50,15 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         
         grand_total_meals += number_of_meals
 
-        # Build the row: [Meal Name, Total Count, Counts for each diet...]
+        # Build the row: [Meal Name, Total Count, Checkboxes for each diet...]
         row = [meal_name, number_of_meals]
         for diet in all_diets:
-            # Check if this meal type has this diet restriction and add the count
-            if diet in has_diets:
-                row.append(has_diets[diet])  # Add the actual count for this diet
+            # Check if this meal type has this diet restriction and add a checkbox if count > 0
+            if diet in has_diets and has_diets[diet] > 0:
+                row.append(True)  # TRUE renders as a checked checkbox in Google Sheets
                 diet_totals[diet] += has_diets[diet]
             else:
-                row.append("")  # Leave blank
+                row.append(False)  # FALSE renders as an unchecked checkbox
 
         table_data.append(row)
 
