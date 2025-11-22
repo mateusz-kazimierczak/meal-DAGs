@@ -111,6 +111,9 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
     
     # Prepare packed meals data with diets
     packed_table_data = []
+    packed_grand_total = 0
+    packed_diet_totals = {diet: 0 for diet in all_diets}
+    
     for meal_key, meal_name in packed_meal_types.items():
         if meal_key in tomorrow_data:
             meal_details = tomorrow_data[meal_key]
@@ -120,15 +123,22 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
             number_of_meals = 0
             has_diets = {}
         
+        packed_grand_total += number_of_meals
+        
         # Build row with checkboxes for diets
         row = [meal_name, number_of_meals]
         for diet in all_diets:
             if diet in has_diets and has_diets[diet] > 0:
                 row.append(True)
+                packed_diet_totals[diet] += has_diets[diet]
             else:
                 row.append(False)
         
         packed_table_data.append(row)
+    
+    # Add grand totals row for packed meals
+    packed_totals_row = ["Grand totals", packed_grand_total] + [packed_diet_totals[diet] for diet in all_diets]
+    packed_table_data.append(packed_totals_row)
     
     # Add headers and data for packed meals
     packed_headers = ["Packed Meals for Tomorrow", "Total"] + all_diets
@@ -189,7 +199,7 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         
         # Calculate section rows
         packed_start_row = end_row + 2
-        packed_end_row = packed_start_row + 4  # Title + 3 rows of data (P1, P2, PS)
+        packed_end_row = packed_start_row + 5  # Title + 3 rows of data (P1, P2, PS) + grand total
         prediction_start_row = packed_end_row + 2
         prediction_end_row = prediction_start_row + 5  # Title + 4 rows of data
         
@@ -380,7 +390,7 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                     'range': {
                         'sheetId': sheet_id,
                         'startRowIndex': packed_start_row,
-                        'endRowIndex': packed_end_row,
+                        'endRowIndex': packed_end_row - 1,  # Exclude the grand totals row
                         'startColumnIndex': start_col_idx + 2,  # Skip "Meal Type" and "Total" columns
                         'endColumnIndex': end_col_idx + 1
                     },
@@ -419,6 +429,46 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                         }
                     },
                     'fields': 'userEnteredFormat(textFormat,backgroundColor,horizontalAlignment,verticalAlignment)'
+                }
+            },
+            # Make the first column of packed meals section wider
+            {
+                'updateDimensionProperties': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'dimension': 'COLUMNS',
+                        'startIndex': start_col_idx,
+                        'endIndex': start_col_idx + 1
+                    },
+                    'properties': {
+                        'pixelSize': 220  # Wider for "Packed Meals for Tomorrow"
+                    },
+                    'fields': 'pixelSize'
+                }
+            },
+            # Bold and highlight packed meals grand totals row
+            {
+                'repeatCell': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'startRowIndex': packed_end_row - 1,
+                        'endRowIndex': packed_end_row,
+                        'startColumnIndex': start_col_idx,
+                        'endColumnIndex': end_col_idx + 1
+                    },
+                    'cell': {
+                        'userEnteredFormat': {
+                            'textFormat': {
+                                'bold': True
+                            },
+                            'backgroundColor': {
+                                'red': 0.95,
+                                'green': 0.95,
+                                'blue': 0.85
+                            }
+                        }
+                    },
+                    'fields': 'userEnteredFormat(textFormat,backgroundColor)'
                 }
             },
             # Add border around packed meals section
