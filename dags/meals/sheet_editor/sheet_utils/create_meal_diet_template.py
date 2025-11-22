@@ -98,17 +98,59 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         'values': [[f"Meals for date: {date_val.format('D-M-YYYY')}"]]
     })
 
-    # Add "Prediction for Tomorrow" section
+    # Add "Packed Meals for Tomorrow" section
     tomorrow_data = input_data.get("tomorrow", {})
-    prediction_start_row = end_row + 2  # 2 rows below the main table
+    packed_start_row = end_row + 2  # 2 rows below the main table
     
-    # Prepare tomorrow's prediction data
+    # Define packed meal types
+    packed_meal_types = {
+        "P1": "Pack Lunch P1",
+        "P2": "Pack Lunch P2",
+        "PS": "Pack Supper"
+    }
+    
+    # Prepare packed meals data with diets
+    packed_table_data = []
+    for meal_key, meal_name in packed_meal_types.items():
+        if meal_key in tomorrow_data:
+            meal_details = tomorrow_data[meal_key]
+            number_of_meals = meal_details.get("number", 0)
+            has_diets = meal_details.get("hasDiet", {})
+        else:
+            number_of_meals = 0
+            has_diets = {}
+        
+        # Build row with checkboxes for diets
+        row = [meal_name, number_of_meals]
+        for diet in all_diets:
+            if diet in has_diets and has_diets[diet] > 0:
+                row.append(True)
+            else:
+                row.append(False)
+        
+        packed_table_data.append(row)
+    
+    # Add headers and data for packed meals
+    packed_headers = ["Packed Meals for Tomorrow", "Total"] + all_diets
+    packed_all_rows = [packed_headers] + packed_table_data
+    
+    packed_end_row = packed_start_row + len(packed_all_rows) - 1
+    packed_range = f'{sheet_name}!{start_col_letter}{packed_start_row}:{end_col_letter}{packed_end_row}'
+    batch_data.append({
+        'range': packed_range,
+        'values': packed_all_rows
+    })
+
+    # Add "Prediction for Tomorrow" section (now below packed meals)
+    prediction_start_row = packed_end_row + 2  # 2 rows below the packed meals table
+    
+    # Prepare tomorrow's prediction data - B, L, S are just counts, not dicts
     prediction_rows = [
         ["Prediction for Tomorrow"],
-        ["Breakfast", tomorrow_data.get("B")],
+        ["Breakfast", tomorrow_data.get("B", 0)],
         ["Breakfast with snack", ""],  # Leave blank as requested
-        ["Lunch", tomorrow_data.get("L")],
-        ["Supper", tomorrow_data.get("S")]
+        ["Lunch", tomorrow_data.get("L", 0)],
+        ["Supper", tomorrow_data.get("S", 0)]
     ]
     
     prediction_range = f'{sheet_name}!{start_col_letter}{prediction_start_row}:{chr(ord(start_col_letter) + 1)}{prediction_start_row + len(prediction_rows) - 1}'
@@ -145,8 +187,10 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         start_col_idx = start_col_index
         end_col_idx = start_col_index + len(headers) - 1
         
-        # Calculate prediction section rows
-        prediction_start_row = end_row + 2
+        # Calculate section rows
+        packed_start_row = end_row + 2
+        packed_end_row = packed_start_row + 4  # Title + 3 rows of data (P1, P2, PS)
+        prediction_start_row = packed_end_row + 2
         prediction_end_row = prediction_start_row + 5  # Title + 4 rows of data
         
         formatting_requests = [
@@ -328,6 +372,114 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                         'pixelSize': 150  # Set minimum column width
                     },
                     'fields': 'pixelSize'
+                }
+            },
+            # Add checkbox data validation to packed meals diet columns
+            {
+                'setDataValidation': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'startRowIndex': packed_start_row,
+                        'endRowIndex': packed_end_row,
+                        'startColumnIndex': start_col_idx + 2,  # Skip "Meal Type" and "Total" columns
+                        'endColumnIndex': end_col_idx + 1
+                    },
+                    'rule': {
+                        'condition': {
+                            'type': 'BOOLEAN'
+                        },
+                        'strict': True,
+                        'showCustomUi': True
+                    }
+                }
+            },
+            # Format "Packed Meals for Tomorrow" header
+            {
+                'repeatCell': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'startRowIndex': packed_start_row - 1,
+                        'endRowIndex': packed_start_row,
+                        'startColumnIndex': start_col_idx,
+                        'endColumnIndex': end_col_idx + 1
+                    },
+                    'cell': {
+                        'userEnteredFormat': {
+                            'textFormat': {
+                                'bold': True,
+                                'fontSize': 11
+                            },
+                            'backgroundColor': {
+                                'red': 0.85,
+                                'green': 0.85,
+                                'blue': 0.85
+                            },
+                            'horizontalAlignment': 'CENTER',
+                            'verticalAlignment': 'MIDDLE'
+                        }
+                    },
+                    'fields': 'userEnteredFormat(textFormat,backgroundColor,horizontalAlignment,verticalAlignment)'
+                }
+            },
+            # Add border around packed meals section
+            {
+                'updateBorders': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'startRowIndex': packed_start_row - 1,
+                        'endRowIndex': packed_end_row,
+                        'startColumnIndex': start_col_idx,
+                        'endColumnIndex': end_col_idx + 1
+                    },
+                    'top': {
+                        'style': 'SOLID',
+                        'width': 2,
+                        'color': {'red': 0, 'green': 0, 'blue': 0}
+                    },
+                    'bottom': {
+                        'style': 'SOLID',
+                        'width': 2,
+                        'color': {'red': 0, 'green': 0, 'blue': 0}
+                    },
+                    'left': {
+                        'style': 'SOLID',
+                        'width': 2,
+                        'color': {'red': 0, 'green': 0, 'blue': 0}
+                    },
+                    'right': {
+                        'style': 'SOLID',
+                        'width': 2,
+                        'color': {'red': 0, 'green': 0, 'blue': 0}
+                    },
+                    'innerHorizontal': {
+                        'style': 'SOLID',
+                        'width': 1,
+                        'color': {'red': 0.7, 'green': 0.7, 'blue': 0.7}
+                    },
+                    'innerVertical': {
+                        'style': 'SOLID',
+                        'width': 1,
+                        'color': {'red': 0.7, 'green': 0.7, 'blue': 0.7}
+                    }
+                }
+            },
+            # Center align packed meals data cells
+            {
+                'repeatCell': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'startRowIndex': packed_start_row,
+                        'endRowIndex': packed_end_row,
+                        'startColumnIndex': start_col_idx,
+                        'endColumnIndex': end_col_idx + 1
+                    },
+                    'cell': {
+                        'userEnteredFormat': {
+                            'horizontalAlignment': 'CENTER',
+                            'verticalAlignment': 'MIDDLE'
+                        }
+                    },
+                    'fields': 'userEnteredFormat(horizontalAlignment,verticalAlignment)'
                 }
             },
             # Format "Prediction for Tomorrow" title

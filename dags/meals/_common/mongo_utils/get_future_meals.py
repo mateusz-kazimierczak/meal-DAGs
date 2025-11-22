@@ -45,6 +45,36 @@ def get_future_meals(date, mongo_conn_id="mongoid", db_name="test", collection_n
             total_counts["L"] += 1
         if meals_for_day[2]:
             total_counts["S"] += 1
+    
+    # For packed meals, have the get the actual meal counts from the days collection
+    days_collection = client[db_name]['days']
+    date_str = date.format('D/M/YYYY')
+    doc = days_collection.find_one({"date": date_str})
 
+    MEAL_TYPES = ["P1", "P2", "PS"]
+
+    packed_meals = doc.get("packedMeals", [])
+
+    # Initialize data dictionary
+    data_dict = {
+        meal_type: {"number": 0, "hasDiet": {}}
+        for meal_type in MEAL_TYPES
+    }
+
+    for meal_type, meal_list in zip(MEAL_TYPES, packed_meals):
+        data_dict[meal_type]["number"] = len(meal_list)
+        
+        # Count users per diet
+        diet_counts = defaultdict(int)
+        for user in meal_list:
+            diet = user.get("diet")
+            if diet is not None:
+                diet_counts[diet] += 1
+        
+        data_dict[meal_type]["hasDiet"] = dict(diet_counts)
+
+
+    # merge packed meal counts into total_counts
+    total_counts.update(data_dict)
 
     return total_counts
