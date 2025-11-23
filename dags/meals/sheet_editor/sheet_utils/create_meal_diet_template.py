@@ -199,9 +199,9 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         
         # Calculate section rows
         packed_start_row = end_row + 2
-        packed_end_row = packed_start_row + 5  # Title + 3 rows of data (P1, P2, PS) + grand total
+        packed_end_row = packed_start_row + 4  # Title + 3 rows of data (P1, P2, PS) + grand total
         prediction_start_row = packed_end_row + 2
-        prediction_end_row = prediction_start_row + 5  # Title + 4 rows of data
+        prediction_end_row = prediction_start_row + 4  # Title + 4 rows of data
         
         formatting_requests = [
             # Add checkbox data validation to diet columns
