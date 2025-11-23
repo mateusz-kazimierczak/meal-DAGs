@@ -156,7 +156,7 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
     
     # Prepare tomorrow's prediction data - B, L, S are just counts, not dicts
     prediction_rows = [
-        ["Prediction for Tomorrow"],
+        ["Prediction for Tomorrow", ""],  # Header row with empty second cell
         ["Breakfast", tomorrow_data.get("B", 0)],
         ["Breakfast with snack", ""],  # Leave blank as requested
         ["Lunch", tomorrow_data.get("L", 0)],
@@ -552,10 +552,11 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                                 'red': 0.85,
                                 'green': 0.85,
                                 'blue': 0.85
-                            }
+                            },
+                            'horizontalAlignment': 'LEFT'
                         }
                     },
-                    'fields': 'userEnteredFormat(textFormat,backgroundColor)'
+                    'fields': 'userEnteredFormat(textFormat,backgroundColor,horizontalAlignment)'
                 }
             },
             # Add border around prediction section
@@ -564,7 +565,7 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                     'range': {
                         'sheetId': sheet_id,
                         'startRowIndex': prediction_start_row - 1,
-                        'endRowIndex': prediction_end_row - 1,
+                        'endRowIndex': prediction_end_row,
                         'startColumnIndex': start_col_idx,
                         'endColumnIndex': start_col_idx + 2
                     },
@@ -606,7 +607,7 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                     'range': {
                         'sheetId': sheet_id,
                         'startRowIndex': prediction_start_row,
-                        'endRowIndex': prediction_end_row - 1,
+                        'endRowIndex': prediction_end_row,
                         'startColumnIndex': start_col_idx,
                         'endColumnIndex': start_col_idx + 2
                     },
