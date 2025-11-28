@@ -1,6 +1,8 @@
 from googleapiclient.discovery import build
 import string
 
+from dags.meals._common.mongo_utils.get_diets import get_all_diets
+
 def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, input_data):
     """
     Creates a meal and diet summary table in a Google Sheet starting at a specific row index.
@@ -27,7 +29,15 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
 
     # Extract all unique diet types from the data dictionary to create columns
     # We will sort them alphabetically for consistent column order
-    all_diets = sorted(list(set(diet for meal_key in data_dict for diet in data_dict[meal_key]["hasDiet"].keys())))
+    day_diets = set(diet for meal_key in data_dict for diet in data_dict[meal_key]["hasDiet"].keys())
+    # Add diets from the database to ensure all are shown
+
+    db_diets = get_all_diets()
+
+    # Additional column as key, add checkbox for the given meal types only
+    additional_cols = {"At Snack": ["P1", "P2", "PS"]}
+
+    all_diets = sorted(list(set(day_diets) | set(db_diets) | set(additional_cols.keys())))
 
     headers = ["Meal Type", "Total"] + all_diets
 
@@ -53,12 +63,26 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         # Build the row: [Meal Name, Total Count, Checkboxes for each diet...]
         row = [meal_name, number_of_meals]
         for diet in all_diets:
-            # Check if this meal type has this diet restriction and add a checkbox if count > 0
-            if diet in has_diets and has_diets[diet] > 0:
-                row.append(True)  # TRUE renders as a checked checkbox in Google Sheets
-                diet_totals[diet] += has_diets[diet]
+            # Check if this diet is an additional column with specific meal type requirements
+            if diet in additional_cols:
+                # Only add checkbox if this meal type is in the allowed list for this column
+                if meal_key_short in additional_cols[diet]:
+                    # Check if this meal type has this diet restriction
+                    if diet in has_diets and has_diets[diet] > 0:
+                        row.append(True)
+                        diet_totals[diet] += has_diets[diet]
+                    else:
+                        row.append(False)
+                else:
+                    # Leave blank for meal types not in the allowed list
+                    row.append("")
             else:
-                row.append(False)  # FALSE renders as an unchecked checkbox
+                # Regular diet column - add checkbox for all meal types
+                if diet in has_diets and has_diets[diet] > 0:
+                    row.append(True)  # TRUE renders as a checked checkbox in Google Sheets
+                    diet_totals[diet] += has_diets[diet]
+                else:
+                    row.append(False)  # FALSE renders as an unchecked checkbox
 
         table_data.append(row)
 
