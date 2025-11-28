@@ -1,7 +1,7 @@
 from googleapiclient.discovery import build
 import string
 
-from dags.meals._common.mongo_utils.get_diets import get_all_diets
+from meals._common.mongo_utils.get_diets import get_all_diets
 
 def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, input_data):
     """
