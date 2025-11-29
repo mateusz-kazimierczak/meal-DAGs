@@ -230,26 +230,63 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         prediction_start_row = packed_end_row + 2
         prediction_end_row = prediction_start_row + 4  # Title + 4 rows of data
         
-        formatting_requests = [
-            # Add checkbox data validation to diet columns
-            {
-                'setDataValidation': {
-                    'range': {
-                        'sheetId': sheet_id,
-                        'startRowIndex': start_row,
-                        'endRowIndex': end_row - 1,  # Exclude the totals row
-                        'startColumnIndex': start_col_idx + 2,  # Skip "Meal Type" and "Total" columns
-                        'endColumnIndex': end_col_idx + 1
-                    },
-                    'rule': {
-                        'condition': {
-                            'type': 'BOOLEAN'
+        formatting_requests = []
+        
+        # Add checkbox data validation to diet columns dynamically
+        # We need to handle regular diet columns and additional columns separately
+        diet_col_offset = 2  # Skip "Meal Type" and "Total" columns
+        
+        for idx, diet in enumerate(all_diets):
+            col_idx = start_col_idx + diet_col_offset + idx
+            
+            if diet in additional_cols:
+                # For additional columns, only add checkboxes to specific meal type rows
+                allowed_meal_keys = additional_cols[diet]
+                
+                # Find the row indices for the allowed meal types
+                for row_offset, (meal_key, meal_name) in enumerate(meal_types_map.items()):
+                    if meal_key in allowed_meal_keys:
+                        # Add checkbox for this specific cell
+                        formatting_requests.append({
+                            'setDataValidation': {
+                                'range': {
+                                    'sheetId': sheet_id,
+                                    'startRowIndex': start_row + row_offset,
+                                    'endRowIndex': start_row + row_offset + 1,
+                                    'startColumnIndex': col_idx,
+                                    'endColumnIndex': col_idx + 1
+                                },
+                                'rule': {
+                                    'condition': {
+                                        'type': 'BOOLEAN'
+                                    },
+                                    'strict': True,
+                                    'showCustomUi': True
+                                }
+                            }
+                        })
+            else:
+                # For regular diet columns, add checkboxes to all meal type rows
+                formatting_requests.append({
+                    'setDataValidation': {
+                        'range': {
+                            'sheetId': sheet_id,
+                            'startRowIndex': start_row,
+                            'endRowIndex': end_row - 1,  # Exclude the totals row
+                            'startColumnIndex': col_idx,
+                            'endColumnIndex': col_idx + 1
                         },
-                        'strict': True,
-                        'showCustomUi': True
+                        'rule': {
+                            'condition': {
+                                'type': 'BOOLEAN'
+                            },
+                            'strict': True,
+                            'showCustomUi': True
+                        }
                     }
-                }
-            },
+                })
+        
+        formatting_requests.extend([
             # Bold header row
             {
                 'repeatCell': {
@@ -410,26 +447,63 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                     },
                     'fields': 'pixelSize'
                 }
-            },
-            # Add checkbox data validation to packed meals diet columns
-            {
-                'setDataValidation': {
-                    'range': {
-                        'sheetId': sheet_id,
-                        'startRowIndex': packed_start_row,
-                        'endRowIndex': packed_end_row - 1,  # Exclude the grand totals row
-                        'startColumnIndex': start_col_idx + 2,  # Skip "Meal Type" and "Total" columns
-                        'endColumnIndex': end_col_idx + 1
-                    },
-                    'rule': {
-                        'condition': {
-                            'type': 'BOOLEAN'
+            }
+        ])
+        
+        # Add checkbox data validation to packed meals diet columns dynamically
+        # Handle regular diet columns and additional columns separately for packed meals
+        for idx, diet in enumerate(all_diets):
+            col_idx = start_col_idx + 2 + idx  # Skip "Meal Type" and "Total" columns
+            
+            if diet in additional_cols:
+                # For additional columns in packed meals, check if any packed meal types match
+                # Packed meals are always P1, P2, PS
+                allowed_meal_keys = additional_cols[diet]
+                packed_meal_keys = ["P1", "P2", "PS"]
+                
+                # Find which rows should have checkboxes
+                for row_offset, meal_key in enumerate(packed_meal_keys):
+                    if meal_key in allowed_meal_keys:
+                        formatting_requests.append({
+                            'setDataValidation': {
+                                'range': {
+                                    'sheetId': sheet_id,
+                                    'startRowIndex': packed_start_row + row_offset,
+                                    'endRowIndex': packed_start_row + row_offset + 1,
+                                    'startColumnIndex': col_idx,
+                                    'endColumnIndex': col_idx + 1
+                                },
+                                'rule': {
+                                    'condition': {
+                                        'type': 'BOOLEAN'
+                                    },
+                                    'strict': True,
+                                    'showCustomUi': True
+                                }
+                            }
+                        })
+            else:
+                # For regular diet columns, add checkboxes to all packed meal rows
+                formatting_requests.append({
+                    'setDataValidation': {
+                        'range': {
+                            'sheetId': sheet_id,
+                            'startRowIndex': packed_start_row,
+                            'endRowIndex': packed_end_row - 1,  # Exclude the grand totals row
+                            'startColumnIndex': col_idx,
+                            'endColumnIndex': col_idx + 1
                         },
-                        'strict': True,
-                        'showCustomUi': True
+                        'rule': {
+                            'condition': {
+                                'type': 'BOOLEAN'
+                            },
+                            'strict': True,
+                            'showCustomUi': True
+                        }
                     }
-                }
-            },
+                })
+        
+        formatting_requests.extend([
             # Format "Packed Meals for Tomorrow" header
             {
                 'repeatCell': {
@@ -647,7 +721,7 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                     'fields': 'userEnteredFormat(horizontalAlignment,verticalAlignment)'
                 }
             }
-        ]
+        ])
         
         # Apply formatting
         format_body = {
