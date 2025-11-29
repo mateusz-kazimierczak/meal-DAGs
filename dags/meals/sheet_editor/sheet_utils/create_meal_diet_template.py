@@ -37,7 +37,10 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
     # Additional column as key, add checkbox for the given meal types only
     additional_cols = {"At Snack": ["P1", "P2", "PS"]}
 
-    all_diets = sorted(list(set(day_diets) | set(db_diets) | set(additional_cols.keys())))
+    all_diets = sorted(list(set(day_diets) | set(db_diets)))
+
+    # Add the additional columns at the end
+    all_diets.extend(additional_cols.keys())
 
     headers = ["Meal Type", "Total"] + all_diets
 
