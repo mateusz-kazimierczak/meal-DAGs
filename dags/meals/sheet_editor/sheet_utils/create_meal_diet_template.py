@@ -272,6 +272,88 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
     
     print(f"Template created and {result.get('totalUpdatedCells')} cells updated successfully.")
     
+    # Update the summary statistics at the top of the sheet (B2:C3)
+    # The Average row in Total Diners is at row: total_diners_start_row + 4 (header + 3 categories + average)
+    daily_average_row = total_diners_start_row + 4
+    
+    # Read current values from C2 and C3 to determine if this is the first day or not
+    current_stats_range = f'{sheet_name}!C2:C3'
+    current_stats = service.spreadsheets().values().get(
+        spreadsheetId=spreadsheet_id,
+        range=current_stats_range
+    ).execute()
+    
+    current_values = current_stats.get('values', [[0], [0]])
+    current_avg = current_values[0][0] if current_values and len(current_values) > 0 else 0
+    current_days = current_values[1][0] if current_values and len(current_values) > 1 else 0
+    
+    # Check if current values are formulas or numbers
+    # If it's 0, this is the first day, so just reference the daily average
+    # Otherwise, we need to build a formula that averages all daily averages
+    
+    if current_days == 0 or current_days == '0':
+        # First day - just reference this day's average
+        new_avg_formula = f"=F{daily_average_row}"
+        new_days_formula = 1
+    else:
+        # Not the first day - need to find all Average rows and average them
+        # We'll use a different approach: read the current formula and extend it
+        # For simplicity, we'll use AVERAGE of a range that includes all F columns where daily averages are
+        # Since we don't know all the row numbers, we'll use a simpler approach:
+        # Store in C2 a formula that calculates running average
+        
+        # Get the current formula from C2
+        current_formula_response = service.spreadsheets().values().get(
+            spreadsheetId=spreadsheet_id,
+            range=f'{sheet_name}!C2',
+            valueRenderOption='FORMULA'
+        ).execute()
+        
+        current_formula = current_formula_response.get('values', [['']])[0][0] if current_formula_response.get('values') else ''
+        
+        if current_formula and current_formula.startswith('='):
+            # Extract the cell references from existing formula and add new one
+            # Current formula is like =F10 or =AVERAGE(F10,F25,...)
+            if 'AVERAGE' in current_formula:
+                # Remove =AVERAGE( and ) to get the cell list
+                cells = current_formula.replace('=AVERAGE(', '').replace(')', '')
+                new_avg_formula = f"=AVERAGE({cells},F{daily_average_row})"
+            else:
+                # Single cell reference, convert to AVERAGE
+                old_cell = current_formula.replace('=', '')
+                new_avg_formula = f"=AVERAGE({old_cell},F{daily_average_row})"
+        else:
+            # Fallback: just reference the new daily average
+            new_avg_formula = f"=F{daily_average_row}"
+        
+        # Increment days count - it could be a number or formula
+        if isinstance(current_days, str) and current_days.startswith('='):
+            # It's a formula, just add 1 to it
+            new_days_formula = f"={current_days.replace('=', '')}+1"
+        else:
+            # It's a number, increment it
+            try:
+                new_days_formula = int(current_days) + 1
+            except (ValueError, TypeError):
+                new_days_formula = 1
+    
+    # Update the summary statistics
+    summary_update_range = f'{sheet_name}!C2:C3'
+    summary_body = {
+        'values': [
+            [new_avg_formula],
+            [new_days_formula]
+        ]
+    }
+    service.spreadsheets().values().update(
+        spreadsheetId=spreadsheet_id,
+        range=summary_update_range,
+        valueInputOption='USER_ENTERED',
+        body=summary_body
+    ).execute()
+    
+    print(f"Updated summary statistics: Average formula and days count.")
+    
     # 7. Apply formatting to make the table look better
     # Get sheet ID (needed for formatting requests)
     sheet_metadata = service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
