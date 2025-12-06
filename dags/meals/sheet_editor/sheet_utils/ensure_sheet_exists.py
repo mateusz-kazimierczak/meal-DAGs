@@ -35,10 +35,14 @@ def ensure_sheet_exists(service, spreadsheet_id, sheet_name):
         ).execute()
         print(f"Created new sheet: {sheet_name}")
         
-        # Add header to the newly created sheet
-        header_range = f'{sheet_name}!B1'
+        # Add header and statistics labels to the newly created sheet
+        header_range = f'{sheet_name}!B1:C3'
         header_body = {
-            'values': [[sheet_name]]
+            'values': [
+                [sheet_name, ""],
+                ["Average number of diners:", 0],
+                ["Days considered:", 0]
+            ]
         }
         service.spreadsheets().values().update(
             spreadsheetId=spreadsheet_id,
@@ -61,6 +65,7 @@ def ensure_sheet_exists(service, spreadsheet_id, sheet_name):
         if sheet_id is not None:
             format_request = {
                 'requests': [
+                    # Format the header (title) - bold and larger
                     {
                         'repeatCell': {
                             'range': {
@@ -81,6 +86,50 @@ def ensure_sheet_exists(service, spreadsheet_id, sheet_name):
                             },
                             'fields': 'userEnteredFormat(textFormat,horizontalAlignment)'
                         }
+                    },
+                    # Format the statistics labels (column B) - regular text
+                    {
+                        'repeatCell': {
+                            'range': {
+                                'sheetId': sheet_id,
+                                'startRowIndex': 1,
+                                'endRowIndex': 3,
+                                'startColumnIndex': 1,  # Column B
+                                'endColumnIndex': 2
+                            },
+                            'cell': {
+                                'userEnteredFormat': {
+                                    'textFormat': {
+                                        'bold': False,
+                                        'fontSize': 10
+                                    },
+                                    'horizontalAlignment': 'LEFT'
+                                }
+                            },
+                            'fields': 'userEnteredFormat(textFormat,horizontalAlignment)'
+                        }
+                    },
+                    # Format the statistics values (column C) - regular text, center aligned
+                    {
+                        'repeatCell': {
+                            'range': {
+                                'sheetId': sheet_id,
+                                'startRowIndex': 1,
+                                'endRowIndex': 3,
+                                'startColumnIndex': 2,  # Column C
+                                'endColumnIndex': 3
+                            },
+                            'cell': {
+                                'userEnteredFormat': {
+                                    'textFormat': {
+                                        'bold': False,
+                                        'fontSize': 10
+                                    },
+                                    'horizontalAlignment': 'CENTER'
+                                }
+                            },
+                            'fields': 'userEnteredFormat(textFormat,horizontalAlignment)'
+                        }
                     }
                 ]
             }
@@ -89,7 +138,7 @@ def ensure_sheet_exists(service, spreadsheet_id, sheet_name):
                 body=format_request
             ).execute()
         
-        print(f"Added header to sheet: {sheet_name}")
+        print(f"Added header and statistics labels to sheet: {sheet_name}")
         return True
     
     return False
