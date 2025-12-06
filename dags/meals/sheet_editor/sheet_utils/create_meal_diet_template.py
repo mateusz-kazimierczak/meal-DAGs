@@ -243,6 +243,14 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         
         total_diners_rows.append([category, formula])
     
+    # Add Average row - calculate average of the three categories
+    # The three category rows are at total_diners_start_row, +1, +2 (0-indexed in sheet, so +1 for 1-based)
+    breakfast_row = total_diners_start_row + 1
+    dinner_row = total_diners_start_row + 2
+    lunch_row = total_diners_start_row + 3
+    average_formula = f"=AVERAGE(F{breakfast_row},F{dinner_row},F{lunch_row})"
+    total_diners_rows.append(["Average", average_formula])
+    
     # Place Total Diners in columns E and F (starting at column index 4)
     total_diners_range = f'{sheet_name}!E{total_diners_start_row}:F{total_diners_start_row + len(total_diners_rows) - 1}'
     batch_data.append({
@@ -284,7 +292,7 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         prediction_start_row = packed_end_row + 2
         prediction_end_row = prediction_start_row + 4  # Title + 4 rows of data
         total_diners_start_row = prediction_start_row  # Same row as prediction
-        total_diners_end_row = total_diners_start_row + 3  # Title + 3 categories (Breakfast, Dinner, Lunch)
+        total_diners_end_row = total_diners_start_row + 4  # Title + 3 categories (Breakfast, Dinner, Lunch) + Average
         
         formatting_requests = []
         
@@ -863,6 +871,31 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                         }
                     },
                     'fields': 'userEnteredFormat(horizontalAlignment,verticalAlignment)'
+                }
+            },
+            # Bold and highlight Average row (like grand totals)
+            {
+                'repeatCell': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'startRowIndex': total_diners_end_row - 1,  # Last row is Average
+                        'endRowIndex': total_diners_end_row,
+                        'startColumnIndex': 4,  # Column E
+                        'endColumnIndex': 6  # Column F
+                    },
+                    'cell': {
+                        'userEnteredFormat': {
+                            'textFormat': {
+                                'bold': True
+                            },
+                            'backgroundColor': {
+                                'red': 0.95,
+                                'green': 0.95,
+                                'blue': 0.85
+                            }
+                        }
+                    },
+                    'fields': 'userEnteredFormat(textFormat,backgroundColor)'
                 }
             }
         ])
