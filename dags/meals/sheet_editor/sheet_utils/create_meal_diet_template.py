@@ -7,7 +7,7 @@ from meals._common.mongo_utils.get_diets import get_all_diets
 MEAL_CATEGORIES = {
     "Breakfast": ["Breakfast"],
     "Dinner": ["Supper at table", "Late Supper (normal)", "Late Supper in container"],
-    "Lunch": ["Pack Lunch P1", "Pack Lunch P2", "Pack Supper"]
+    "Lunch": ["Pack Lunch P1", "Pack Lunch P2", "Pack Supper", "Lunch"]
 }
 
 def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, input_data):
@@ -203,8 +203,8 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         'values': prediction_rows
     })
 
-    # Add "Total Diners" section (below prediction section)
-    total_diners_start_row = prediction_start_row + len(prediction_rows) + 2  # 2 rows below prediction
+    # Add "Total Diners" section (to the left of prediction section, columns D and E)
+    total_diners_start_row = prediction_start_row  # Same row as prediction section
     
     # Create a mapping of meal names to their row positions in the main table
     meal_name_to_row = {}
@@ -243,7 +243,8 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         
         total_diners_rows.append([category, formula])
     
-    total_diners_range = f'{sheet_name}!{start_col_letter}{total_diners_start_row}:{chr(ord(start_col_letter) + 1)}{total_diners_start_row + len(total_diners_rows) - 1}'
+    # Place Total Diners in columns E and F (starting at column index 4)
+    total_diners_range = f'{sheet_name}!E{total_diners_start_row}:F{total_diners_start_row + len(total_diners_rows) - 1}'
     batch_data.append({
         'range': total_diners_range,
         'values': total_diners_rows
@@ -282,7 +283,7 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         packed_end_row = packed_start_row + 4  # Title + 3 rows of data (P1, P2, PS) + grand total
         prediction_start_row = packed_end_row + 2
         prediction_end_row = prediction_start_row + 4  # Title + 4 rows of data
-        total_diners_start_row = prediction_start_row + 5 + 2  # prediction has 5 rows, +2 for spacing
+        total_diners_start_row = prediction_start_row  # Same row as prediction
         total_diners_end_row = total_diners_start_row + 3  # Title + 3 categories (Breakfast, Dinner, Lunch)
         
         formatting_requests = []
@@ -783,8 +784,8 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                         'sheetId': sheet_id,
                         'startRowIndex': total_diners_start_row - 1,
                         'endRowIndex': total_diners_start_row,
-                        'startColumnIndex': start_col_idx,
-                        'endColumnIndex': start_col_idx + 2
+                        'startColumnIndex': 4,  # Column E
+                        'endColumnIndex': 6  # Column F
                     },
                     'cell': {
                         'userEnteredFormat': {
@@ -810,8 +811,8 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                         'sheetId': sheet_id,
                         'startRowIndex': total_diners_start_row - 1,
                         'endRowIndex': total_diners_end_row,
-                        'startColumnIndex': start_col_idx,
-                        'endColumnIndex': start_col_idx + 2
+                        'startColumnIndex': 4,  # Column E
+                        'endColumnIndex': 6  # Column F
                     },
                     'top': {
                         'style': 'SOLID',
@@ -852,8 +853,8 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                         'sheetId': sheet_id,
                         'startRowIndex': total_diners_start_row,
                         'endRowIndex': total_diners_end_row,
-                        'startColumnIndex': start_col_idx,
-                        'endColumnIndex': start_col_idx + 2
+                        'startColumnIndex': 4,  # Column E
+                        'endColumnIndex': 6  # Column F
                     },
                     'cell': {
                         'userEnteredFormat': {
