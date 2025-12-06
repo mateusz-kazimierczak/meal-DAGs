@@ -248,7 +248,7 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
     breakfast_row = total_diners_start_row + 1
     dinner_row = total_diners_start_row + 2
     lunch_row = total_diners_start_row + 3
-    average_formula = f"=AVERAGE(F{breakfast_row},F{dinner_row},F{lunch_row})"
+    average_formula = f"=ROUND(AVERAGE(F{breakfast_row},F{dinner_row},F{lunch_row}),1)"
     total_diners_rows.append(["Average", average_formula])
     
     # Place Total Diners in columns E and F (starting at column index 4)
