@@ -3,6 +3,13 @@ import string
 
 from meals._common.mongo_utils.get_diets import get_all_diets
 
+# Define meal categories for total diners calculation
+MEAL_CATEGORIES = {
+    "Breakfast": ["Breakfast"],
+    "Dinner": ["Supper at table", "Late Supper (normal)", "Late Supper in container"],
+    "Lunch": ["Pack Lunch P1", "Pack Lunch P2", "Pack Supper"]
+}
+
 def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, input_data):
     """
     Creates a meal and diet summary table in a Google Sheet starting at a specific row index.
@@ -196,6 +203,52 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         'values': prediction_rows
     })
 
+    # Add "Total Diners" section (below prediction section)
+    total_diners_start_row = prediction_start_row + len(prediction_rows) + 2  # 2 rows below prediction
+    
+    # Create a mapping of meal names to their row positions in the main table
+    meal_name_to_row = {}
+    for idx, (meal_key, meal_name) in enumerate(meal_types_map.items()):
+        meal_name_to_row[meal_name] = start_row + idx  # +1 for header, but 0-indexed
+    
+    # Also map packed meal names to their row positions in the packed meals table
+    packed_meal_name_to_row = {}
+    for idx, (meal_key, meal_name) in enumerate(packed_meal_types.items()):
+        packed_meal_name_to_row[meal_name] = packed_start_row + idx
+    
+    # Build formulas for each category
+    total_diners_rows = [
+        ["Total Diners", ""]  # Header row
+    ]
+    
+    category_formulas = {}
+    for category, meal_names in MEAL_CATEGORIES.items():
+        # Build SUM formula by finding the appropriate cell references
+        cell_refs = []
+        for meal_name in meal_names:
+            if meal_name in meal_name_to_row:
+                # Reference from main table (column C is the Total column)
+                row_num = meal_name_to_row[meal_name] + 1  # +1 for 1-based indexing
+                cell_refs.append(f"C{row_num}")
+            elif meal_name in packed_meal_name_to_row:
+                # Reference from packed meals table (column C is the Total column)
+                row_num = packed_meal_name_to_row[meal_name] + 1  # +1 for 1-based indexing
+                cell_refs.append(f"C{row_num}")
+        
+        # Create the SUM formula
+        if cell_refs:
+            formula = f"=SUM({','.join(cell_refs)})"
+        else:
+            formula = 0
+        
+        total_diners_rows.append([category, formula])
+    
+    total_diners_range = f'{sheet_name}!{start_col_letter}{total_diners_start_row}:{chr(ord(start_col_letter) + 1)}{total_diners_start_row + len(total_diners_rows) - 1}'
+    batch_data.append({
+        'range': total_diners_range,
+        'values': total_diners_rows
+    })
+
     # 6. Execute the batch update for values
     body = {
         'valueInputOption': 'USER_ENTERED',
@@ -229,6 +282,8 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         packed_end_row = packed_start_row + 4  # Title + 3 rows of data (P1, P2, PS) + grand total
         prediction_start_row = packed_end_row + 2
         prediction_end_row = prediction_start_row + 4  # Title + 4 rows of data
+        total_diners_start_row = prediction_start_row + 5 + 2  # prediction has 5 rows, +2 for spacing
+        total_diners_end_row = total_diners_start_row + 3  # Title + 3 categories (Breakfast, Dinner, Lunch)
         
         formatting_requests = []
         
@@ -709,6 +764,94 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                         'sheetId': sheet_id,
                         'startRowIndex': prediction_start_row,
                         'endRowIndex': prediction_end_row,
+                        'startColumnIndex': start_col_idx,
+                        'endColumnIndex': start_col_idx + 2
+                    },
+                    'cell': {
+                        'userEnteredFormat': {
+                            'horizontalAlignment': 'CENTER',
+                            'verticalAlignment': 'MIDDLE'
+                        }
+                    },
+                    'fields': 'userEnteredFormat(horizontalAlignment,verticalAlignment)'
+                }
+            },
+            # Format "Total Diners" title
+            {
+                'repeatCell': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'startRowIndex': total_diners_start_row - 1,
+                        'endRowIndex': total_diners_start_row,
+                        'startColumnIndex': start_col_idx,
+                        'endColumnIndex': start_col_idx + 2
+                    },
+                    'cell': {
+                        'userEnteredFormat': {
+                            'textFormat': {
+                                'bold': True,
+                                'fontSize': 11
+                            },
+                            'backgroundColor': {
+                                'red': 0.85,
+                                'green': 0.85,
+                                'blue': 0.85
+                            },
+                            'horizontalAlignment': 'LEFT'
+                        }
+                    },
+                    'fields': 'userEnteredFormat(textFormat,backgroundColor,horizontalAlignment)'
+                }
+            },
+            # Add border around total diners section
+            {
+                'updateBorders': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'startRowIndex': total_diners_start_row - 1,
+                        'endRowIndex': total_diners_end_row,
+                        'startColumnIndex': start_col_idx,
+                        'endColumnIndex': start_col_idx + 2
+                    },
+                    'top': {
+                        'style': 'SOLID',
+                        'width': 2,
+                        'color': {'red': 0, 'green': 0, 'blue': 0}
+                    },
+                    'bottom': {
+                        'style': 'SOLID',
+                        'width': 2,
+                        'color': {'red': 0, 'green': 0, 'blue': 0}
+                    },
+                    'left': {
+                        'style': 'SOLID',
+                        'width': 2,
+                        'color': {'red': 0, 'green': 0, 'blue': 0}
+                    },
+                    'right': {
+                        'style': 'SOLID',
+                        'width': 2,
+                        'color': {'red': 0, 'green': 0, 'blue': 0}
+                    },
+                    'innerHorizontal': {
+                        'style': 'SOLID',
+                        'width': 1,
+                        'color': {'red': 0.7, 'green': 0.7, 'blue': 0.7}
+                    },
+                    'innerVertical': {
+                        'style': 'SOLID',
+                        'width': 1,
+                        'color': {'red': 0.7, 'green': 0.7, 'blue': 0.7}
+                    }
+                }
+            },
+            # Center align total diners data cells
+            {
+                'repeatCell': {
+                    'range': {
+                        'sheetId': sheet_id,
+                        'startRowIndex': total_diners_start_row,
+                        'endRowIndex': total_diners_end_row,
                         'startColumnIndex': start_col_idx,
                         'endColumnIndex': start_col_idx + 2
                     },
