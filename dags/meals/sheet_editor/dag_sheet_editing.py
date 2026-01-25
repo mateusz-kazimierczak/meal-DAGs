@@ -52,7 +52,7 @@ with DAG(
     @task()
     def update_google_sheet(data_bundle):
 
-        SPREADSHEET_ID = '1Cwby6QGITHfPMirBkiHpLxk8nv16ql5TuerRXrzqv_I'
+        SPREADSHEET_ID = '1QmqeeDAaM2Cyv_zpQB9xYfcLEpBjLmqXuODqpbDfQZw'
 
         """Appends data to the specified Google Sheet."""
         service = get_sheets_service()
