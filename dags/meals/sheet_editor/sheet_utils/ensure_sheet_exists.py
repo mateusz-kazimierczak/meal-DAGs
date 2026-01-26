@@ -130,6 +130,18 @@ def ensure_sheet_exists(service, spreadsheet_id, sheet_name):
                             },
                             'fields': 'userEnteredFormat(textFormat,horizontalAlignment)'
                         }
+                    },
+                    # Freeze columns A and B so meal types stay visible when scrolling
+                    {
+                        'updateSheetProperties': {
+                            'properties': {
+                                'sheetId': sheet_id,
+                                'gridProperties': {
+                                    'frozenColumnCount': 2  # Freeze columns A and B
+                                }
+                            },
+                            'fields': 'gridProperties.frozenColumnCount'
+                        }
                     }
                 ]
             }
