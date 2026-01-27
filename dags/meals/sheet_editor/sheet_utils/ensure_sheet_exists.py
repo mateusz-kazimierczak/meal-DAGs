@@ -36,7 +36,7 @@ def ensure_sheet_exists(service, spreadsheet_id, sheet_name):
         print(f"Created new sheet: {sheet_name}")
         
         # Add header and statistics labels to the newly created sheet
-        header_range = f'{sheet_name}!B1:C3'
+        header_range = f'{sheet_name}!A1:B3'
         header_body = {
             'values': [
                 [sheet_name, ""],
@@ -72,8 +72,8 @@ def ensure_sheet_exists(service, spreadsheet_id, sheet_name):
                                 'sheetId': sheet_id,
                                 'startRowIndex': 0,
                                 'endRowIndex': 1,
-                                'startColumnIndex': 1,  # Column B
-                                'endColumnIndex': 2
+                                'startColumnIndex': 0,  # Column A
+                                'endColumnIndex': 1
                             },
                             'cell': {
                                 'userEnteredFormat': {
@@ -87,7 +87,29 @@ def ensure_sheet_exists(service, spreadsheet_id, sheet_name):
                             'fields': 'userEnteredFormat(textFormat,horizontalAlignment)'
                         }
                     },
-                    # Format the statistics labels (column B) - regular text
+                    # Format the statistics labels (column A) - regular text
+                    {
+                        'repeatCell': {
+                            'range': {
+                                'sheetId': sheet_id,
+                                'startRowIndex': 1,
+                                'endRowIndex': 3,
+                                'startColumnIndex': 0,  # Column A
+                                'endColumnIndex': 1
+                            },
+                            'cell': {
+                                'userEnteredFormat': {
+                                    'textFormat': {
+                                        'bold': False,
+                                        'fontSize': 10
+                                    },
+                                    'horizontalAlignment': 'LEFT'
+                                }
+                            },
+                            'fields': 'userEnteredFormat(textFormat,horizontalAlignment)'
+                        }
+                    },
+                    # Format the statistics values (column B) - regular text, center aligned
                     {
                         'repeatCell': {
                             'range': {
@@ -103,41 +125,19 @@ def ensure_sheet_exists(service, spreadsheet_id, sheet_name):
                                         'bold': False,
                                         'fontSize': 10
                                     },
-                                    'horizontalAlignment': 'LEFT'
-                                }
-                            },
-                            'fields': 'userEnteredFormat(textFormat,horizontalAlignment)'
-                        }
-                    },
-                    # Format the statistics values (column C) - regular text, center aligned
-                    {
-                        'repeatCell': {
-                            'range': {
-                                'sheetId': sheet_id,
-                                'startRowIndex': 1,
-                                'endRowIndex': 3,
-                                'startColumnIndex': 2,  # Column C
-                                'endColumnIndex': 3
-                            },
-                            'cell': {
-                                'userEnteredFormat': {
-                                    'textFormat': {
-                                        'bold': False,
-                                        'fontSize': 10
-                                    },
                                     'horizontalAlignment': 'CENTER'
                                 }
                             },
                             'fields': 'userEnteredFormat(textFormat,horizontalAlignment)'
                         }
                     },
-                    # Freeze columns A and B so meal types stay visible when scrolling
+                    # Freeze column A so meal types stay visible when scrolling
                     {
                         'updateSheetProperties': {
                             'properties': {
                                 'sheetId': sheet_id,
                                 'gridProperties': {
-                                    'frozenColumnCount': 2  # Freeze columns A and B
+                                    'frozenColumnCount': 1  # Freeze column A
                                 }
                             },
                             'fields': 'gridProperties.frozenColumnCount'

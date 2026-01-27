@@ -13,7 +13,7 @@ MEAL_CATEGORIES = {
 def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, input_data):
     """
     Creates a meal and diet summary table in a Google Sheet starting at a specific row index.
-    The table will always start at column B.
+    The table will always start at column A.
 
     Args:
         service: Authorized Google Sheets API service instance.
@@ -101,9 +101,9 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
     table_data.append(grand_totals_row)
 
     # 4. Determine the A1 notation for the target range
-    # Always start at column B (index 1)
-    start_col_index = 1  # Column B
-    start_col_letter = 'B'
+    # Always start at column A (index 0)
+    start_col_index = 0  # Column A
+    start_col_letter = 'A'
     end_col_letter = string.ascii_uppercase[(start_col_index + len(headers) - 1) % 26]
     start_row = start_row_index
 
@@ -227,13 +227,13 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         cell_refs = []
         for meal_name in meal_names:
             if meal_name in meal_name_to_row:
-                # Reference from main table (column C is the Total column)
+                # Reference from main table (column B is the Total column)
                 row_num = meal_name_to_row[meal_name] + 1  # +1 for 1-based indexing
-                cell_refs.append(f"C{row_num}")
+                cell_refs.append(f"B{row_num}")
             elif meal_name in packed_meal_name_to_row:
-                # Reference from packed meals table (column C is the Total column)
+                # Reference from packed meals table (column B is the Total column)
                 row_num = packed_meal_name_to_row[meal_name] + 1  # +1 for 1-based indexing
-                cell_refs.append(f"C{row_num}")
+                cell_refs.append(f"B{row_num}")
         
         # Create the SUM formula
         if cell_refs:
@@ -248,11 +248,11 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
     breakfast_row = total_diners_start_row + 1
     dinner_row = total_diners_start_row + 2
     lunch_row = total_diners_start_row + 3
-    average_formula = f"=ROUND(AVERAGE(F{breakfast_row},F{dinner_row},F{lunch_row}),1)"
+    average_formula = f"=ROUND(AVERAGE(E{breakfast_row},E{dinner_row},E{lunch_row}),1)"
     total_diners_rows.append(["Average", average_formula])
     
-    # Place Total Diners in columns E and F (starting at column index 4)
-    total_diners_range = f'{sheet_name}!E{total_diners_start_row}:F{total_diners_start_row + len(total_diners_rows) - 1}'
+    # Place Total Diners in columns D and E (starting at column index 3)
+    total_diners_range = f'{sheet_name}!D{total_diners_start_row}:E{total_diners_start_row + len(total_diners_rows) - 1}'
     batch_data.append({
         'range': total_diners_range,
         'values': total_diners_rows
@@ -272,12 +272,12 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
     
     print(f"Template created and {result.get('totalUpdatedCells')} cells updated successfully.")
     
-    # Update the summary statistics at the top of the sheet (B2:C3)
+    # Update the summary statistics at the top of the sheet (A2:B3)
     # The Average row in Total Diners is at row: total_diners_start_row + 4 (header + 3 categories + average)
     daily_average_row = total_diners_start_row + 4
     
-    # Read current values from C2 and C3 to determine if this is the first day or not
-    current_stats_range = f'{sheet_name}!C2:C3'
+    # Read current values from B2 and B3 to determine if this is the first day or not
+    current_stats_range = f'{sheet_name}!B2:B3'
     current_stats = service.spreadsheets().values().get(
         spreadsheetId=spreadsheet_id,
         range=current_stats_range
@@ -293,7 +293,7 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
     
     if current_days == 0 or current_days == '0':
         # First day - just reference this day's average
-        new_avg_formula = f"=F{daily_average_row}"
+        new_avg_formula = f"=E{daily_average_row}"
         new_days_formula = 1
     else:
         # Not the first day - need to find all Average rows and average them
@@ -302,10 +302,10 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         # Since we don't know all the row numbers, we'll use a simpler approach:
         # Store in C2 a formula that calculates running average
         
-        # Get the current formula from C2
+        # Get the current formula from B2
         current_formula_response = service.spreadsheets().values().get(
             spreadsheetId=spreadsheet_id,
-            range=f'{sheet_name}!C2',
+            range=f'{sheet_name}!B2',
             valueRenderOption='FORMULA'
         ).execute()
         
@@ -317,14 +317,14 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
             if 'AVERAGE' in current_formula:
                 # Remove =AVERAGE( and ) to get the cell list
                 cells = current_formula.replace('=AVERAGE(', '').replace(')', '')
-                new_avg_formula = f"=AVERAGE({cells},F{daily_average_row})"
+                new_avg_formula = f"=AVERAGE({cells},E{daily_average_row})"
             else:
                 # Single cell reference, convert to AVERAGE
                 old_cell = current_formula.replace('=', '')
-                new_avg_formula = f"=AVERAGE({old_cell},F{daily_average_row})"
+                new_avg_formula = f"=AVERAGE({old_cell},E{daily_average_row})"
         else:
             # Fallback: just reference the new daily average
-            new_avg_formula = f"=F{daily_average_row}"
+            new_avg_formula = f"=E{daily_average_row}"
         
         # Increment days count - it could be a number or formula
         if isinstance(current_days, str) and current_days.startswith('='):
@@ -338,7 +338,7 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                 new_days_formula = 1
     
     # Update the summary statistics
-    summary_update_range = f'{sheet_name}!C2:C3'
+    summary_update_range = f'{sheet_name}!B2:B3'
     summary_body = {
         'values': [
             [new_avg_formula],
@@ -874,8 +874,8 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                         'sheetId': sheet_id,
                         'startRowIndex': total_diners_start_row - 1,
                         'endRowIndex': total_diners_start_row,
-                        'startColumnIndex': 4,  # Column E
-                        'endColumnIndex': 6  # Column F
+                        'startColumnIndex': 3,  # Column D
+                        'endColumnIndex': 5  # Column E
                     },
                     'cell': {
                         'userEnteredFormat': {
@@ -901,8 +901,8 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                         'sheetId': sheet_id,
                         'startRowIndex': total_diners_start_row - 1,
                         'endRowIndex': total_diners_end_row,
-                        'startColumnIndex': 4,  # Column E
-                        'endColumnIndex': 6  # Column F
+                        'startColumnIndex': 3,  # Column D
+                        'endColumnIndex': 5  # Column E
                     },
                     'top': {
                         'style': 'SOLID',
@@ -943,8 +943,8 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                         'sheetId': sheet_id,
                         'startRowIndex': total_diners_start_row,
                         'endRowIndex': total_diners_end_row,
-                        'startColumnIndex': 4,  # Column E
-                        'endColumnIndex': 6  # Column F
+                        'startColumnIndex': 3,  # Column D
+                        'endColumnIndex': 5  # Column E
                     },
                     'cell': {
                         'userEnteredFormat': {
@@ -962,8 +962,8 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
                         'sheetId': sheet_id,
                         'startRowIndex': total_diners_end_row - 1,  # Last row is Average
                         'endRowIndex': total_diners_end_row,
-                        'startColumnIndex': 4,  # Column E
-                        'endColumnIndex': 6  # Column F
+                        'startColumnIndex': 3,  # Column D
+                        'endColumnIndex': 5  # Column E
                     },
                     'cell': {
                         'userEnteredFormat': {
