@@ -43,6 +43,13 @@ def get_meals_per_day(date, mongo_conn_id="mongoid", db_name="test", collection_
     # Combine all meal lists
     all_meals = doc.get("meals", []) + doc.get("packedMeals", [])
 
+    # Add guests to the all meals list
+    guests = doc.get("guests", [])
+    for guest in guests:
+        meal_index = guest.get("meal")
+        if meal_index is not None and 0 <= meal_index < len(all_meals):
+            all_meals[meal_index].append(guest)
+
     print("all meals:", all_meals)  # Debugging output
     
     # Process each meal type
