@@ -24,7 +24,7 @@ with DAG(
         dag_id="meal_sheet_update_dag",
         description="Fetch meal data from MongoDB and update Google Sheets",
         schedule=MultipleCronTriggerTimetable(
-        "45 8 * * *",   # 8:45 AM
+        "35 8 * * *",   # 8:45 AM
         timezone=local_tz,
     ),
         start_date=pendulum.datetime(2025, 11, 1, tz="UTC"),
