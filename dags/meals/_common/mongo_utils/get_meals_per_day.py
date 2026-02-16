@@ -42,6 +42,8 @@ def get_meals_per_day(date, mongo_conn_id="mongoid", db_name="test", collection_
     
     # Combine all meal lists
     all_meals = doc.get("meals", []) + doc.get("packedMeals", [])
+
+    print("all meals:", all_meals)  # Debugging output
     
     # Process each meal type
     for meal_type, meal_list in zip(MEAL_TYPES, all_meals):
