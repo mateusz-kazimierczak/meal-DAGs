@@ -1,10 +1,12 @@
 from airflow.sdk import DAG, task
+from airflow.models.param import Param
 from airflow.providers.mongo.hooks.mongo import MongoHook
 from airflow.timetables.trigger import MultipleCronTriggerTimetable
 from googleapiclient.errors import HttpError
 
 import pendulum
 import datetime
+import json
 from meals._common.mongo_utils.get_future_meals import get_future_meals
 from meals._common.mongo_utils.get_meals_per_day import get_meals_per_day
 from meals.sheet_editor.sheet_utils.ensure_sheet_exists import ensure_sheet_exists
@@ -28,6 +30,13 @@ with DAG(
         start_date=pendulum.datetime(2025, 11, 1, tz="UTC"),
         catchup=False,
         tags=["meals", "google_sheets", "mongodb"],
+        params={
+            "dry_run": Param(
+                default=False,
+                type="boolean",
+                description="If true, only extract and print data without updating the Google Sheet.",
+            ),
+        },
 ) as dag:
 
     # =====================
@@ -50,7 +59,23 @@ with DAG(
     # Task 2: Update Google Sheet
     # =====================
     @task()
-    def update_google_sheet(data_bundle):
+    def update_google_sheet(data_bundle, dag_run=None):
+
+        dry_run = dag_run.conf.get("dry_run", False)
+
+        if dry_run:
+            print("=== DRY RUN — Skipping sheet update ===")
+            
+            # Convert pendulum date to string for JSON serialization
+            printable_data = {
+                "date": data_bundle['date'].to_iso8601_string(),
+                "today": data_bundle['today'],
+                "tomorrow": data_bundle['tomorrow']
+            }
+            
+            print("\nExtracted Meal Data:")
+            print(json.dumps(printable_data, indent=2, default=str))
+            return
 
         SPREADSHEET_ID = '1QmqeeDAaM2Cyv_zpQB9xYfcLEpBjLmqXuODqpbDfQZw'
 
