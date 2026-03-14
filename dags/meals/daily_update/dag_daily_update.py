@@ -1,7 +1,8 @@
 """
 Daily Meals Update DAG
 ======================
-Runs every day at 08:30 America/Toronto time.
+Schedule is loaded from ~/airflow/schedule_config.json (written by settings_sync DAG).
+Falls back to hardcoded defaults if the file is missing.
 
 Migrated from ec-meals-backend/src/app/api/internal/dailyUpdate/route.js.
 Email/notification sending is intentionally excluded — handled by meal_notifications DAG.
@@ -25,6 +26,7 @@ Airflow Connections required:
 
 import json
 import logging
+from pathlib import Path
 
 import pendulum
 from airflow.models.param import Param
@@ -37,6 +39,26 @@ from meals._common.config import get_config, get_mongo_conn_id
 logger = logging.getLogger(__name__)
 
 TORONTO_TZ = pendulum.timezone("America/Toronto")
+
+# ---------------------------------------------------------------------------
+# Schedule loading — reads from schedule_config.json written by settings_sync
+# ---------------------------------------------------------------------------
+
+_SCHEDULE_CONFIG_PATH = Path.home() / "airflow" / "schedule_config.json"
+_SCHEDULE_DEFAULTS = {
+    "daily_update": {"crons": ["30 8 * * 1-5", "15 9 * * 0,6"]},
+    "sheet_update":  {"crons": ["35 8 * * 1-5", "20 9 * * 0,6"]},
+}
+
+
+def _load_schedule(key: str) -> dict:
+    try:
+        return json.loads(_SCHEDULE_CONFIG_PATH.read_text())[key]
+    except Exception:
+        return _SCHEDULE_DEFAULTS[key]
+
+
+_daily_sched = _load_schedule("daily_update")
 
 
 # ---------------------------------------------------------------------------
@@ -99,8 +121,7 @@ def serialize_bson(obj):
 @dag(
     dag_id="daily_meals_update",
     schedule=MultipleCronTriggerTimetable(
-        "30 8 * * 1-5",  # 8:30 AM Mon–Fri
-        "15 9 * * 0,6",  # 9:15 AM Sat–Sun
+        *_daily_sched["crons"],
         timezone=TORONTO_TZ,
     ),
     start_date=pendulum.datetime(2025, 1, 1, tz="UTC"),

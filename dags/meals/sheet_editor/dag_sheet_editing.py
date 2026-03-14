@@ -1,10 +1,12 @@
+import json
+from pathlib import Path
+
+import pendulum
 from airflow.sdk import DAG, task
 from airflow.models.param import Param
 from airflow.timetables.trigger import MultipleCronTriggerTimetable
 from googleapiclient.errors import HttpError
 
-import pendulum
-import json
 from meals._common.config import get_config, get_mongo_conn_id
 from meals._common.mongo_utils.get_future_meals import get_future_meals
 from meals._common.mongo_utils.get_meals_per_day import get_meals_per_day
@@ -13,6 +15,25 @@ from meals.sheet_editor.sheet_utils.get_last_sheet_row import get_last_row_numbe
 from meals.sheet_editor.sheet_utils.get_service import get_sheets_service
 from meals.sheet_editor.sheet_utils.create_meal_diet_template import create_meal_template
 
+# ---------------------------------------------------------------------------
+# Schedule loading — reads from schedule_config.json written by settings_sync
+# ---------------------------------------------------------------------------
+
+_SCHEDULE_CONFIG_PATH = Path.home() / "airflow" / "schedule_config.json"
+_SCHEDULE_DEFAULTS = {
+    "daily_update": {"crons": ["30 8 * * 1-5", "15 9 * * 0,6"]},
+    "sheet_update":  {"crons": ["35 8 * * 1-5", "20 9 * * 0,6"]},
+}
+
+
+def _load_schedule(key: str) -> dict:
+    try:
+        return json.loads(_SCHEDULE_CONFIG_PATH.read_text())[key]
+    except Exception:
+        return _SCHEDULE_DEFAULTS[key]
+
+
+_sheet_sched = _load_schedule("sheet_update")
 
 local_tz = pendulum.timezone("America/Toronto")
 
@@ -20,8 +41,7 @@ with DAG(
         dag_id="meal_sheet_update_dag",
         description="Fetch meal data from MongoDB and update Google Sheets",
         schedule=MultipleCronTriggerTimetable(
-            "35 8 * * 1-5",  # 8:35 AM Mon–Fri
-            "20 9 * * 0,6",  # 9:20 AM Sat–Sun
+            *_sheet_sched["crons"],
             timezone=local_tz,
         ),
         start_date=pendulum.datetime(2025, 11, 1, tz="UTC"),
