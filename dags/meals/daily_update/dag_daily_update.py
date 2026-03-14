@@ -148,7 +148,7 @@ def daily_meals_update():
 
         client.close()
 
-        return {
+        return json.loads(json.dumps({
             "env":                     env,
             "users":                   [serialize_bson(u) for u in users],
             "days":                    [serialize_bson(d) for d in days],
@@ -157,7 +157,7 @@ def daily_meals_update():
             "next_week_today_str":     next_week_today_str,
             "next_week_tomorrow_str":  next_week_tomorrow_str,
             "now":                     now.isoformat(),
-        }
+        }))
 
     # ------------------------------------------------------------------
     # STEP 2 — Process users
@@ -272,9 +272,8 @@ def daily_meals_update():
             len(no_meals), len(unmarked), len(meal_changes),
         )
 
-        return {
+        result = {
             "env":                 data["env"],
-            # Only pass _id + meals — not full user objects — to keep XCom payload small
             "user_updates":        [{"_id": u["_id"], "meals": u["meals"]} for u in users],
             "today":               today,
             "tomorrow":            day_tomorrow,
@@ -282,6 +281,9 @@ def daily_meals_update():
             "next_week_tomorrow":  next_week_tomorrow,
             "meal_changes":        meal_changes,
         }
+        # Force JSON round-trip to catch any non-serializable types before Airflow
+        # tries to push to XCom API, which sends None body on silent serialization failure
+        return json.loads(json.dumps(result))
 
     # ------------------------------------------------------------------
     # STEP 3a — BigQuery audit insert
