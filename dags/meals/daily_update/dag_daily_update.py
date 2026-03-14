@@ -96,7 +96,8 @@ def serialize_bson(obj):
 @dag(
     dag_id="daily_meals_update",
     schedule=MultipleCronTriggerTimetable(
-        "30 8 * * *",
+        "30 8 * * 1-5",  # 8:30 AM Mon–Fri
+        "15 9 * * 0,6",  # 9:15 AM Sat–Sun
         timezone=TORONTO_TZ,
     ),
     start_date=pendulum.datetime(2025, 1, 1, tz="UTC"),
