@@ -274,7 +274,8 @@ def daily_meals_update():
 
         return {
             "env":                 data["env"],
-            "users":               users,
+            # Only pass _id + meals — not full user objects — to keep XCom payload small
+            "user_updates":        [{"_id": u["_id"], "meals": u["meals"]} for u in users],
             "today":               today,
             "tomorrow":            day_tomorrow,
             "next_week_today":     next_week_today,
@@ -362,14 +363,14 @@ def daily_meals_update():
         client = hook.get_conn()
         db     = client[config["MONGO_DB"]]
 
-        for user in results["users"]:
+        for user in results["user_updates"]:
             db.users.update_one(
                 {"_id": ObjectId(user["_id"])},
                 {"$set": {"meals": user["meals"]}},
             )
 
         client.close()
-        logger.info("Saved meal arrays for %d user(s)", len(results["users"]))
+        logger.info("Saved meal arrays for %d user(s)", len(results["user_updates"]))
 
     # ------------------------------------------------------------------
     # Wire up the pipeline
