@@ -1,6 +1,7 @@
 from airflow.providers.mongo.hooks.mongo import MongoHook
 import pendulum
 
+
 def ensure_user_in_dict(dict, user):
     user_id = str(user["_id"])
 
@@ -9,7 +10,6 @@ def ensure_user_in_dict(dict, user):
         user_name = user.get("firstName")
         user_send_email = user.get("notifications", {}).get("notificationTypes", {}).get("email", False)
         user_send_push = user.get("notifications", {}).get("notificationTypes", {}).get("push", False)
-
 
         dict[user_id] = {
             'send_email': user_send_email,
@@ -23,7 +23,6 @@ def ensure_user_in_dict(dict, user):
 def is_user_in_week_meals(user, relevant_day_date):
     is_user_in_meals = False
 
-
     for meal in user['meals'][relevant_day_date.day_of_week][:3]:
         if meal:
             is_user_in_meals = True
@@ -33,7 +32,6 @@ def is_user_in_week_meals(user, relevant_day_date):
 
 def is_user_in_week_packed_meals(user, relevant_day_date):
     is_user_in_meals = False
-
 
     for meal in user['meals'][relevant_day_date.day_of_week][3:6]:
         if meal:
@@ -46,8 +44,8 @@ def get_user_packed_meals(meals, user):
     user_meals = [False, False, False]
 
     for i in range(3):
-        user_meals[i] = user['_id'] in meals['packedMeals'][i] 
-    
+        user_meals[i] = user['_id'] in meals['packedMeals'][i]
+
     return user_meals
 
 def handle_user_day_notification(user, relevant_day_date, relevant_day_label, relevant_meal_type, is_user_in_meals_relevant, is_user_in_packed_relevant, notification_objects):
@@ -60,7 +58,6 @@ def handle_user_day_notification(user, relevant_day_date, relevant_day_label, re
                 "text": f"No meals marked for {relevant_day_label}"
             })
     else:
-        
         if user['notifications']['schema'][relevant_meal_type][relevant_day_date.day_of_week] and not user['meals'][relevant_day_date.day_of_week][6]:
             if not (is_user_in_meals_relevant if relevant_meal_type == 'meals' else is_user_in_packed_relevant):
                 ensure_user_in_dict(notification_objects, user)
@@ -73,23 +70,22 @@ def handle_user_day_notification(user, relevant_day_date, relevant_day_label, re
 def is_user_in_day_meals(user, day_id_list):
     return str(user["_id"]) in day_id_list
 
-def get_relevant_users_task():
+def get_relevant_users_task(mongo_conn_id: str = "mongoid_prod", db_name: str = "test"):
     """
     Get the users that should be notified about the meals.
+
+    Args:
+        mongo_conn_id: Airflow connection ID for MongoDB (e.g. 'mongoid_prod', 'mongoid_dev')
+        db_name:       MongoDB database name from the env config
     """
-    
-    # configure the MongoDB connection
-    hook = MongoHook(mongo_conn_id='mongoid')
+    hook = MongoHook(mongo_conn_id=mongo_conn_id)
     client = hook.get_conn()
-    db = client.test
-    users=db.users
+    db = client[db_name]
+    users = db.users
     meals = db.days
-    
-    # get current day of the week
+
     current_day = (pendulum.now("America/Toronto").day_of_week)
 
-
-    # find if should run morning noon or evening
     notification_time = "morning"
     current_hour = pendulum.now("America/Toronto").hour
 
@@ -102,17 +98,13 @@ def get_relevant_users_task():
 
     print(f"Current day: {current_day}, Notification time: {notification_time}. Hour: {current_hour}")
 
-    # find users that should be notified
-
     user_query = {
         "$and": [
             {"active": True},
-            # make sure the user is active
             {"$or": [
                 {"notifications.notificationTypes.email": True},
                 {"notifications.notificationTypes.push": True}
             ]},
-            # check that he has selected the current notification window
             {f"notifications.schedule.{notification_time}.{current_day}": True},
         ]
     }
@@ -131,7 +123,6 @@ def get_relevant_users_task():
 
     print("getting relevant days :", relevant_day_date.format('D/M/YYYY'), relevant_next_day_date.format('D/M/YYYY'))
 
-    # have to fetch meals for the relevant days
     relevant_meals_cursor = meals.find({
         "$or": [
             {"date": relevant_day_date.format('D/M/YYYY')},
@@ -146,7 +137,6 @@ def get_relevant_users_task():
     except IndexError:
         relevant_day_meals = []
 
-
     try:
         relevant_day_packed_meals = []
         for packed_meal_type in relevant_day_meals['packedMeals']:
@@ -156,37 +146,29 @@ def get_relevant_users_task():
     except AttributeError as e:
         print("Could not get relevant_day_packed_meals:", e)
         relevant_day_packed_meals = []
-        
 
     for user in users.find(user_query):
-
         print(f"Processing user {user['firstName']} {user['lastName']} ({user['_id']})")
 
-        # First check what meals the user is signed up for
         is_user_in_meals_relevant = is_user_in_week_meals(user, relevant_day_date)
         is_user_in_meals_relevant_next = is_user_in_week_meals(user, relevant_next_day_date)
 
         is_user_in_packed_relevant = is_user_in_day_meals(user, relevant_day_packed_meals)
         is_user_in_packed_relevant_next = is_user_in_week_packed_meals(user, relevant_next_day_date)
 
-        # print all relevant meals for the user
         print(f"User {user['_id']} - Relevant meals for {relevant_day_label}: {is_user_in_meals_relevant}")
         print(f"User {user['_id']} - Relevant meals for {relevant_day_label_next}: {is_user_in_meals_relevant_next}")
         print(f"User {user['_id']} - Relevant packed meals for {relevant_day_label}: {is_user_in_packed_relevant}")
         print(f"User {user['_id']} - Relevant packed meals for {relevant_day_label_next}: {is_user_in_packed_relevant_next}")
 
-        # First handle alerts for the current day
         handle_user_day_notification(user, relevant_day_date, relevant_day_label, "meals", is_user_in_meals_relevant, is_user_in_packed_relevant, notification_objects)
-
-        # handle the next day
         handle_user_day_notification(user, relevant_next_day_date, relevant_day_label_next, "packed_meals", is_user_in_meals_relevant_next, is_user_in_packed_relevant_next, notification_objects)
 
         try:
-            # Add full report, both for the relevant day and the next day
             add_report = \
                 user['notifications']['report']['full_report'][relevant_day_date.day_of_week] \
                 or (user['notifications']['report']['report_on_notifications'][relevant_day_date.day_of_week] and len(notification_objects.get(str(user["_id"]), [])) > 0)
-            
+
             if add_report:
                 ensure_user_in_dict(notification_objects, user)
 
