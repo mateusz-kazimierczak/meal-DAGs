@@ -277,12 +277,15 @@ def daily_meals_update():
             "user_updates":        [{"_id": u["_id"], "meals": u["meals"]} for u in users],
             "today":               today,
             "tomorrow":            day_tomorrow,
-            "next_week_today":     next_week_today,
-            "next_week_tomorrow":  next_week_tomorrow,
+            # Use {} sentinel instead of None — Airflow 3.0.6 bug (#55062): xcom_push
+            # with a None value sends an empty HTTP body, causing a 422 from the API server.
+            # update_days checks `if not day_doc` to handle both None and {}.
+            "next_week_today":     next_week_today if next_week_today is not None else {},
+            "next_week_tomorrow":  next_week_tomorrow if next_week_tomorrow is not None else {},
             "meal_changes":        meal_changes,
         }
         # Force JSON round-trip to catch any non-serializable types before Airflow
-        # tries to push to XCom API, which sends None body on silent serialization failure
+        # tries to push to XCom API.
         return json.loads(json.dumps(result))
 
     # ------------------------------------------------------------------
@@ -330,7 +333,7 @@ def daily_meals_update():
         db     = client[config["MONGO_DB"]]
 
         def upsert_day(day_doc):
-            if day_doc is None:
+            if not day_doc:  # handles None and {} sentinel (Airflow 3.0.6 XCom bug workaround)
                 return
             doc_id = day_doc.get("_id")
             body   = {k: v for k, v in day_doc.items() if k != "_id"}
