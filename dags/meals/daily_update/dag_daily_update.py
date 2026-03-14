@@ -78,10 +78,13 @@ def meal_list_merge(existing: list, new_meals: list) -> None:
 
 
 def serialize_bson(obj):
-    """Recursively convert ObjectIds and other BSON types to JSON-safe Python."""
+    """Recursively convert ObjectIds, datetimes, and other BSON types to JSON-safe Python."""
     from bson import ObjectId
+    from datetime import datetime
     if isinstance(obj, ObjectId):
         return str(obj)
+    if isinstance(obj, datetime):
+        return obj.isoformat()
     if isinstance(obj, list):
         return [serialize_bson(item) for item in obj]
     if isinstance(obj, dict):
