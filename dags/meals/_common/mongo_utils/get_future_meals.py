@@ -46,10 +46,17 @@ def get_future_meals(date, mongo_conn_id="mongoid", db_name="test", collection_n
         if meals_for_day[2]:
             total_counts["S"] += 1
     
-    # For packed meals, have the get the actual meal counts from the days collection
+    # For packed meals and guests, read from the days collection
     days_collection = client[db_name]['days']
     date_str = date.format('D/M/YYYY')
-    doc = days_collection.find_one({"date": date_str})
+    doc = days_collection.find_one({"date": date_str}) or {}
+
+    # Add guests for regular meals (B/L/S) — matches the addGuests() logic in the backend
+    REGULAR_MEAL_KEYS = ["B", "L", "S"]
+    for guest in doc.get("guests", []):
+        meal_idx = guest.get("meal")
+        if isinstance(meal_idx, int) and 0 <= meal_idx <= 2:
+            total_counts[REGULAR_MEAL_KEYS[meal_idx]] += 1
 
     MEAL_TYPES = ["P1", "P2", "PS"]
 
