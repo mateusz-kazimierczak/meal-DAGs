@@ -31,7 +31,7 @@ Apache Airflow 3.0 DAG project that automates meal planning workflows: the daily
 - **File**: `dags/meals/notifications/notifications.py`
 - **Schedule**: 7:30 AM, 12:00 PM, 7:30 PM EST
 - **Tasks**: `get_relevant_users` → `[send_email_notifications_task, send_mobile_notifications_task]`
-- **What it does**: Determines which users need notifications (based on their meal schedule + preferences), then delegates to Node.js subprocesses for email and push delivery
+- **What it does**: Determines which users need notifications (based on their meal schedule + preferences), then delegates to Node.js subprocesses for email and push delivery, and writes delivery audit rows to BigQuery table `NOTIFICATION_HISTORY`
 
 ## Key Files
 - `dags/meals/daily_update/dag_daily_update.py` — Daily meal matrix update DAG

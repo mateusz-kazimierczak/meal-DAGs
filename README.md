@@ -92,6 +92,8 @@ Then visit `http://localhost:8080` and enable both DAGs.
 2. `send_email_notifications_task` — Node.js subprocess reads JSON, sends via Resend
 3. `send_mobile_notifications_task` — Node.js subprocess reads JSON, sends via Expo
 
+**BigQuery audit:** Email and push delivery attempts are written to the `NOTIFICATION_HISTORY` table in the same dataset configured by `config.<env>` (`GCP_AUTH`, `GCP_PROJECT`, `BQ_DATASET`).
+
 ## Project Structure
 
 ```
