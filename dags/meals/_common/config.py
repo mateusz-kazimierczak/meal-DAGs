@@ -22,7 +22,7 @@ MongoDB connections are managed separately under Admin → Connections:
 """
 
 import json
-from airflow.models import Variable
+from airflow.sdk import Variable
 
 
 def get_config(env: str) -> dict:

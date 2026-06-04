@@ -23,6 +23,23 @@ NOTIFICATIONS_FILE = dag_file_directory / "notifications.json"
 EMAIL_NOTIFICATION_RESULTS_FILE = dag_file_directory / "email_notification_results.json"
 MOBILE_NOTIFICATION_RESULTS_FILE = dag_file_directory / "mobile_notification_results.json"
 NOTIFICATION_BQ_TABLE = "NOTIFICATION_HISTORY"
+NOTIFICATION_BQ_SCHEMA = [
+    ("NOTIFICATION_CHANNEL", "STRING", "NULLABLE"),
+    ("PROVIDER", "STRING", "NULLABLE"),
+    ("USER_ID", "STRING", "NULLABLE"),
+    ("RECIPIENT", "STRING", "NULLABLE"),
+    ("USER_NAME", "STRING", "NULLABLE"),
+    ("NOTIFICATION_WINDOW", "STRING", "NULLABLE"),
+    ("SENT_AT", "TIMESTAMP", "NULLABLE"),
+    ("STATUS", "STRING", "NULLABLE"),
+    ("ERROR_NAME", "STRING", "NULLABLE"),
+    ("ERROR_MESSAGE", "STRING", "NULLABLE"),
+    ("ERROR_DETAILS", "STRING", "NULLABLE"),
+    ("PROVIDER_MESSAGE_ID", "STRING", "NULLABLE"),
+    ("SUBJECT", "STRING", "NULLABLE"),
+    ("ALERT_TEXT", "STRING", "NULLABLE"),
+    ("ALERT_COUNT", "INTEGER", "NULLABLE"),
+]
 
 local_tz = pendulum.timezone("America/Toronto")
 
@@ -36,6 +53,23 @@ def get_notification_window() -> str:
         return "noon"
 
     return "evening"
+
+
+def _build_notification_bq_table(bq_client, dataset_name: str):
+    from google.cloud import bigquery
+
+    table_ref = bq_client.dataset(dataset_name).table(NOTIFICATION_BQ_TABLE)
+    schema = [
+        bigquery.SchemaField(name, field_type, mode)
+        for name, field_type, mode in NOTIFICATION_BQ_SCHEMA
+    ]
+
+    table = bigquery.Table(table_ref, schema=schema)
+    table.time_partitioning = bigquery.TimePartitioning(
+        type_="DAY",
+        field="SENT_AT",
+    )
+    return bq_client.create_table(table)
 
 
 def load_notification_results(results_file: Path, sender: str, notification_window: str, exit_code: int) -> dict:
@@ -166,6 +200,7 @@ def meal_notifications():
 
     def insert_notification_rows(results: dict, env: str) -> None:
         from google.cloud import bigquery
+        from google.api_core.exceptions import NotFound
         from google.oauth2 import service_account
 
         config = get_config(env)
@@ -179,10 +214,22 @@ def meal_notifications():
             config["GCP_AUTH"]
         )
         bq_client = bigquery.Client(project=config["GCP_PROJECT"], credentials=credentials)
+        table_ref = bq_client.dataset(config["BQ_DATASET"]).table(NOTIFICATION_BQ_TABLE)
+
+        try:
+            bq_client.get_table(table_ref)
+        except NotFound:
+            logger.warning(
+                "Notification BigQuery table %s.%s not found; creating it with default schema.",
+                config["BQ_DATASET"],
+                NOTIFICATION_BQ_TABLE,
+            )
+            _build_notification_bq_table(bq_client, config["BQ_DATASET"])
 
         errors = bq_client.insert_rows_json(
-            bq_client.dataset(config["BQ_DATASET"]).table(NOTIFICATION_BQ_TABLE),
+            table_ref,
             rows,
+            ignore_unknown_values=True,
         )
         if errors:
             raise RuntimeError(f"Notification BigQuery insert errors: {json.dumps(errors)}")
