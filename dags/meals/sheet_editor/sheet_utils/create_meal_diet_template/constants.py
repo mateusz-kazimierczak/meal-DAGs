@@ -22,4 +22,4 @@ PACKED_MEAL_TYPES = {
 }
 
 # Additional columns as key, add checkbox for the given meal types only
-ADDITIONAL_COLS = {"At Snack": ["P1", "P2", "PS"]}
+ADDITIONAL_COLS = {}
