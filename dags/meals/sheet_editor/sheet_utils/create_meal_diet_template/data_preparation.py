@@ -210,7 +210,10 @@ def resolve_diets(data_dict):
     db_diets = get_all_diets()
     diet_user_counts = get_diet_user_counts()
 
-    all_diets = sorted(list(set(day_diets) | set(db_diets)))
+    all_diets = sorted(
+        diet for diet in (set(day_diets) | set(db_diets))
+        if diet.strip().lower() != "at snack"
+    )
     all_diets.extend(ADDITIONAL_COLS.keys())
 
     return all_diets, diet_user_counts

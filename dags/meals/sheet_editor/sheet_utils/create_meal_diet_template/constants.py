@@ -1,8 +1,8 @@
 # Define meal categories for total diners calculation
 MEAL_CATEGORIES = {
     "Breakfast": ["Breakfast"],
-    "Dinner": ["Supper at table", "Late Supper (normal)", "Late Supper in container"],
-    "Lunch": ["Pack Lunch P1", "Pack Lunch P2", "Pack Supper", "Lunch"]
+    "Dinner": ["Supper at table", "Late Supper (normal)", "Late Supper in container", "Tray (Supper)"],
+    "Lunch": ["Pack Lunch P1", "Pack Lunch P2", "Pack Supper", "Lunch", "Tray (Lunch)"]
 }
 
 # Mapping of short meal keys to their full display names (main table)
@@ -12,6 +12,8 @@ MEAL_TYPES_MAP = {
     "S": "Supper at table",
     "LS": "Late Supper (normal)",
     "LSC": "Late Supper in container",
+    "TL": "Tray (Lunch)",
+    "TS": "Tray (Supper)",
 }
 
 # Mapping of short packed meal keys to their full display names
