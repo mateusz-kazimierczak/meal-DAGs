@@ -151,8 +151,8 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         end_col_idx = start_col_index + num_columns - 1
 
         # Re-derive section row boundaries (same logic as above)
-        prediction_end_row = prediction_start_row + len(prediction_rows)
-        total_diners_end_row = prediction_start_row + len(total_diners_rows)
+        prediction_end_row = prediction_start_row + len(prediction_rows) - 1
+        total_diners_end_row = prediction_start_row + len(total_diners_rows) - 1
 
         formatting_requests = []
         formatting_requests.extend(
