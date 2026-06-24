@@ -1,4 +1,4 @@
-from .constants import ADDITIONAL_COLS, MEAL_TYPES_MAP
+from .constants import ADDITIONAL_COLS
 from .data_preparation import _is_numeric_diet
 
 
@@ -117,7 +117,7 @@ def _checkbox_request(sheet_id, start_row, end_row, col_idx):
 
 def build_main_table_formatting(
     sheet_id, all_diets, diet_user_counts,
-    start_col_idx, end_col_idx, start_row, end_row, num_headers
+    start_col_idx, end_col_idx, start_row, end_row, meal_types_map
 ):
     """Return formatting requests for the main meals table.
 
@@ -132,7 +132,7 @@ def build_main_table_formatting(
         if diet in ADDITIONAL_COLS:
             # Checkboxes only on specific meal-type rows
             allowed_meal_keys = ADDITIONAL_COLS[diet]
-            for row_offset, (meal_key, _) in enumerate(MEAL_TYPES_MAP.items()):
+            for row_offset, (meal_key, _) in enumerate(meal_types_map.items()):
                 if meal_key in allowed_meal_keys:
                     requests.append(_checkbox_request(
                         sheet_id,

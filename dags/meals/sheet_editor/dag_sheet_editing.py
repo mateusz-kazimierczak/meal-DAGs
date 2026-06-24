@@ -103,7 +103,7 @@ with DAG(
 
         try:
             date       = data_bundle["date"]
-            sheet_name = date.format('MMMM (YYYY)')
+            sheet_name = date.format('MMMM - YYYY')
 
             ensure_sheet_exists(service, spreadsheet_id, sheet_name)
 

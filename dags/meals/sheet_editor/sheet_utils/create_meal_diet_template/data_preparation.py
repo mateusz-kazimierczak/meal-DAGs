@@ -1,7 +1,5 @@
-import string
-
 from meals._common.mongo_utils.get_diets import get_all_diets, get_diet_user_counts
-from .constants import MEAL_TYPES_MAP, PACKED_MEAL_TYPES, ADDITIONAL_COLS, MEAL_CATEGORIES
+from .constants import PACKED_MEAL_TYPES, ADDITIONAL_COLS, MEAL_CATEGORIES
 
 
 def _is_numeric_diet(diet, diet_user_counts):
@@ -12,7 +10,7 @@ def _is_numeric_diet(diet, diet_user_counts):
     return diet_user_counts.get(diet, 0) > 1
 
 
-def prepare_main_table(data_dict, all_diets, diet_user_counts):
+def prepare_main_table(data_dict, all_diets, diet_user_counts, meal_types_map, table_title):
     """Build the header row and data rows for the main meals table.
 
     For diets with >1 user, cells contain the numeric count (or 0) instead of True/False.
@@ -25,13 +23,13 @@ def prepare_main_table(data_dict, all_diets, diet_user_counts):
     Returns:
         tuple: (headers, table_data, grand_totals_row, diet_totals)
     """
-    headers = ["Meal Type", "Total"] + all_diets
+    headers = [table_title, "Total"] + all_diets
 
     table_data = []
     grand_total_meals = 0
     diet_totals = {diet: 0 for diet in all_diets}
 
-    for meal_key_short, meal_name in MEAL_TYPES_MAP.items():
+    for meal_key_short, meal_name in meal_types_map.items():
         if meal_key_short in data_dict:
             meal_details = data_dict[meal_key_short]
             number_of_meals = meal_details["number"]
@@ -93,26 +91,35 @@ def prepare_packed_meals(tomorrow_data, all_diets, diet_user_counts):
     for meal_key, meal_name in PACKED_MEAL_TYPES.items():
         if meal_key in tomorrow_data:
             meal_details = tomorrow_data[meal_key]
-            number_of_meals = meal_details.get("number", 0)
-            has_diets = meal_details.get("hasDiet", {})
+            if isinstance(meal_details, dict):
+                number_of_meals = meal_details.get("number", 0)
+                has_diets = meal_details.get("hasDiet", {})
+            else:
+                number_of_meals = meal_details
+                has_diets = {}
+        elif meal_key == "PB":
+            number_of_meals = ""
+            has_diets = {}
         else:
             number_of_meals = 0
             has_diets = {}
 
-        packed_grand_total += number_of_meals
+        if isinstance(number_of_meals, (int, float)):
+            packed_grand_total += number_of_meals
 
         row = [meal_name, number_of_meals]
         for diet in all_diets:
             if _is_numeric_diet(diet, diet_user_counts):
-                count = has_diets.get(diet, 0)
+                count = has_diets.get(diet, 0) if number_of_meals != "" else ""
                 row.append(count)
-                packed_diet_totals[diet] += count
+                if isinstance(count, (int, float)):
+                    packed_diet_totals[diet] += count
             else:
                 if diet in has_diets and has_diets[diet] > 0:
                     row.append(True)
                     packed_diet_totals[diet] += has_diets[diet]
                 else:
-                    row.append(False)
+                    row.append(False if number_of_meals != "" else "")
 
         packed_table_data.append(row)
 
@@ -137,30 +144,29 @@ def prepare_prediction(tomorrow_data):
     prediction_rows = [
         ["Prediction for Tomorrow", ""],
         ["Breakfast", tomorrow_data.get("B", 0)],
-        ["Breakfast with snack", ""],
         ["Lunch", tomorrow_data.get("L", 0)],
         ["Supper", tomorrow_data.get("S", 0)]
     ]
     return prediction_rows
 
 
-def prepare_total_diners(meal_types_map, packed_meal_types, start_row, packed_start_row, prediction_start_row):
+def prepare_total_diners(meal_table_row_maps, packed_meal_types, packed_start_row, total_diners_start_row):
     """Build the total-diners section with SUM and AVERAGE formulas.
 
     Args:
-        meal_types_map: Ordered dict of short key -> full meal name (main table).
+        meal_table_row_maps: Sequence of (meal type map, table start row) pairs.
         packed_meal_types: Ordered dict of short key -> full meal name (packed).
-        start_row: 1-based start row of the main table (header row).
         packed_start_row: 1-based start row of the packed meals section (header row).
-        prediction_start_row: 1-based start row of the prediction/total-diners section.
+        total_diners_start_row: 1-based start row of the total-diners section.
 
     Returns:
         list: Rows for the Total Diners section including formulas.
     """
     # Map meal names to their data row (1-based, skipping header)
     meal_name_to_row = {}
-    for idx, (_, meal_name) in enumerate(meal_types_map.items()):
-        meal_name_to_row[meal_name] = start_row + idx
+    for meal_types_map, table_start_row in meal_table_row_maps:
+        for idx, (_, meal_name) in enumerate(meal_types_map.items()):
+            meal_name_to_row[meal_name] = table_start_row + idx
 
     packed_meal_name_to_row = {}
     for idx, (_, meal_name) in enumerate(packed_meal_types.items()):
@@ -181,11 +187,10 @@ def prepare_total_diners(meal_types_map, packed_meal_types, start_row, packed_st
         formula = f"=SUM({','.join(cell_refs)})" if cell_refs else 0
         total_diners_rows.append([category, formula])
 
-    # Average of the three category values (E column)
-    breakfast_row = prediction_start_row + 1
-    dinner_row = prediction_start_row + 2
-    lunch_row = prediction_start_row + 3
-    average_formula = f"=ROUND(AVERAGE(E{breakfast_row},E{dinner_row},E{lunch_row}),1)"
+    # Average of the category values (E column)
+    first_category_row = total_diners_start_row + 1
+    last_category_row = first_category_row + len(MEAL_CATEGORIES) - 1
+    average_formula = f"=ROUND(AVERAGE(E{first_category_row}:E{last_category_row}),1)"
     total_diners_rows.append(["Average", average_formula])
 
     return total_diners_rows
