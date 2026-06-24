@@ -111,6 +111,7 @@ def create_meal_template(service, spreadsheet_id, sheet_name, start_row_index, i
         PACKED_MEAL_TYPES,
         packed_start_row,
         prediction_start_row,
+        prediction_start_row,
     )
     total_diners_range = (
         f'{sheet_name}!D{prediction_start_row}:E{prediction_start_row + len(total_diners_rows) - 1}'

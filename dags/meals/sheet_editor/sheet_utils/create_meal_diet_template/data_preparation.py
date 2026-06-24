@@ -150,13 +150,20 @@ def prepare_prediction(tomorrow_data):
     return prediction_rows
 
 
-def prepare_total_diners(meal_table_row_maps, packed_meal_types, packed_start_row, total_diners_start_row):
+def prepare_total_diners(
+    meal_table_row_maps,
+    packed_meal_types,
+    packed_start_row,
+    prediction_start_row,
+    total_diners_start_row,
+):
     """Build the total-diners section with SUM and AVERAGE formulas.
 
     Args:
         meal_table_row_maps: Sequence of (meal type map, table start row) pairs.
         packed_meal_types: Ordered dict of short key -> full meal name (packed).
         packed_start_row: 1-based start row of the packed meals section (header row).
+        prediction_start_row: 1-based start row of the prediction section (header row).
         total_diners_start_row: 1-based start row of the total-diners section.
 
     Returns:
@@ -172,6 +179,10 @@ def prepare_total_diners(meal_table_row_maps, packed_meal_types, packed_start_ro
     for idx, (_, meal_name) in enumerate(packed_meal_types.items()):
         packed_meal_name_to_row[meal_name] = packed_start_row + idx
 
+    prediction_meal_name_to_row = {
+        "Breakfast": prediction_start_row + 1,
+    }
+
     total_diners_rows = [["Total Diners", ""]]
 
     for category, meal_names in MEAL_CATEGORIES.items():
@@ -182,6 +193,9 @@ def prepare_total_diners(meal_table_row_maps, packed_meal_types, packed_start_ro
                 cell_refs.append(f"B{row_num}")
             elif meal_name in packed_meal_name_to_row:
                 row_num = packed_meal_name_to_row[meal_name] + 1
+                cell_refs.append(f"B{row_num}")
+            elif meal_name in prediction_meal_name_to_row:
+                row_num = prediction_meal_name_to_row[meal_name]
                 cell_refs.append(f"B{row_num}")
 
         formula = f"=SUM({','.join(cell_refs)})" if cell_refs else 0

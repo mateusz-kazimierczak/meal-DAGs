@@ -1,5 +1,6 @@
 # Define meal categories for total diners calculation
 MEAL_CATEGORIES = {
+    "Breakfast": ["Breakfast"],
     "Dinner": ["Supper at table", "Late Supper (normal)", "Late Supper in container", "Tray (Supper)"],
     "Lunch": ["Pack Lunch P1", "Pack Lunch P2", "Pack Supper", "Lunch", "Tray (Lunch)"]
 }
